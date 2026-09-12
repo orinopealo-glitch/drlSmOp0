@@ -86,11 +86,11 @@ LunkaraUI.DefaultMotion = {
 
 LunkaraUI.DefaultSounds = {
     Enabled = true,
-    Hover = 0,
-    Click = 0,
-    Toggle = 0,
-    Open = 0,
-    Close = 0,
+    Hover = 139800881181209,
+    Click = 102702078778790,
+    Toggle = 102702078778790,
+    Open = 130359997277952,
+    Close = 130359997277952,
     Volume = 0.35,
 }
 
