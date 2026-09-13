@@ -13,11 +13,13 @@ local GuiService = game:GetService("GuiService")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local TextService = game:GetService("TextService")
+local Lighting = game:GetService("Lighting")
+local ContentProvider = game:GetService("ContentProvider")
 
 local LocalPlayer = Players.LocalPlayer
 
 local LunkaraUI = {
-    Version = "4.0.0-liquid",
+    Version = "5.0.0-liquid",
     Flags = {},
 }
 
@@ -43,24 +45,24 @@ LunkaraUI.Themes = {
     Liquid = {
         Name = "Liquid",
 
-        Backdrop = Color3.fromRGB(10, 12, 13),
+        Backdrop = Color3.fromRGB(9, 11, 12),
         Glass = Color3.fromRGB(18, 21, 22),
-        GlassAlt = Color3.fromRGB(22, 26, 27),
-        GlassHover = Color3.fromRGB(30, 35, 35),
-        GlassPressed = Color3.fromRGB(36, 41, 41),
-        Sidebar = Color3.fromRGB(13, 16, 17),
-        Search = Color3.fromRGB(25, 29, 30),
-        Field = Color3.fromRGB(27, 31, 32),
-        FieldHover = Color3.fromRGB(34, 39, 40),
+        GlassAlt = Color3.fromRGB(21, 24, 25),
+        GlassHover = Color3.fromRGB(31, 35, 36),
+        GlassPressed = Color3.fromRGB(38, 42, 43),
+        Sidebar = Color3.fromRGB(12, 14, 15),
+        Search = Color3.fromRGB(24, 27, 28),
+        Field = Color3.fromRGB(28, 31, 32),
+        FieldHover = Color3.fromRGB(35, 39, 40),
         Divider = Color3.fromRGB(255, 255, 255),
 
-        Accent = Color3.fromRGB(126, 208, 175),
-        AccentSoft = Color3.fromRGB(64, 104, 89),
+        Accent = Color3.fromRGB(143, 218, 190),
+        AccentSoft = Color3.fromRGB(65, 102, 89),
         AccentText = Color3.fromRGB(8, 17, 14),
 
-        Text = Color3.fromRGB(242, 245, 244),
-        TextSecondary = Color3.fromRGB(165, 174, 172),
-        TextMuted = Color3.fromRGB(108, 117, 115),
+        Text = Color3.fromRGB(244, 246, 245),
+        TextSecondary = Color3.fromRGB(177, 184, 182),
+        TextMuted = Color3.fromRGB(117, 125, 123),
         TextDisabled = Color3.fromRGB(74, 80, 79),
 
         Success = Color3.fromRGB(110, 206, 149),
@@ -68,20 +70,20 @@ LunkaraUI.Themes = {
         Danger = Color3.fromRGB(224, 112, 122),
         Info = Color3.fromRGB(137, 179, 220),
 
-        WindowTransparency = 0.08,
-        SectionTransparency = 0.18,
-        FieldTransparency = 0.15,
-        HoverTransparency = 0.26,
+        WindowTransparency = 0.015,
+        SectionTransparency = 0.035,
+        FieldTransparency = 0.025,
+        HoverTransparency = 0.12,
 
-        RadiusWindow = 10,
+        RadiusWindow = 12,
         RadiusPanel = 8,
         RadiusControl = 5,
         RadiusSmall = 4,
 
-        Width = 840,
-        Height = 560,
-        SidebarWidth = 176,
-        TopbarHeight = 60,
+        Width = 920,
+        Height = 590,
+        SidebarWidth = 190,
+        TopbarHeight = 64,
 
         Font = Enum.Font.Gotham,
         FontMedium = Enum.Font.GothamMedium,
@@ -335,36 +337,39 @@ function Window:_glass(parent, options)
     })
     corner(frame, options.Radius or self.Theme.RadiusPanel)
 
-    local wash = create("Frame", {
-        Name = "LiquidWash",
+    -- Thin top refraction band. This is the only decorative highlight on a glass surface.
+    local refraction = create("Frame", {
+        Name = "Refraction",
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BackgroundTransparency = 0.955,
         BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, options.WashHeight or 26),
+        Position = UDim2.fromOffset(10, 0),
+        Size = UDim2.new(1, -20, 0, 1),
         ZIndex = frame.ZIndex + 1,
         Parent = frame,
     })
-    corner(wash, options.Radius or self.Theme.RadiusPanel)
-    local washGradient = create("UIGradient", {
-        Rotation = 90,
-        Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.15),
-            NumberSequenceKeypoint.new(1, 1),
-        }),
-        Parent = wash,
-    })
-    washGradient.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(1, 1, 1))
 
-    local sheen = create("Frame", {
-        Name = "TopSheen",
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BackgroundTransparency = 0.91,
-        BorderSizePixel = 0,
-        Position = UDim2.fromOffset(8, 0),
-        Size = UDim2.new(1, -16, 0, 1),
-        ZIndex = frame.ZIndex + 2,
-        Parent = frame,
-    })
+    if options.WashHeight and options.WashHeight > 0 then
+        local wash = create("Frame", {
+            Name = "GlassLight",
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+            BackgroundTransparency = 0.982,
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, 0, 0, options.WashHeight),
+            ZIndex = frame.ZIndex,
+            Parent = frame,
+        })
+        corner(wash, options.Radius or self.Theme.RadiusPanel)
+        local gradient = create("UIGradient", {
+            Rotation = 90,
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0.2),
+                NumberSequenceKeypoint.new(1, 1),
+            }),
+            Parent = wash,
+        })
+        gradient.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(1, 1, 1))
+    end
 
     return frame
 end
@@ -429,7 +434,13 @@ function Window:_tooltip(target, text)
                 return
             end
             local mouse = UserInputService:GetMouseLocation()
-            tooltip.Position = UDim2.fromOffset(mouse.X + 14, mouse.Y + 12)
+            local camera = workspace.CurrentCamera
+            local viewport = camera and camera.ViewportSize or Vector2.new(1920, 1080)
+            local width = math.max(220, tooltip.AbsoluteSize.X)
+            local height = math.max(34, tooltip.AbsoluteSize.Y)
+            local x = math.clamp(mouse.X + 14, 8, math.max(8, viewport.X - width - 8))
+            local y = math.clamp(mouse.Y + 12, 8, math.max(8, viewport.Y - height - 8))
+            tooltip.Position = UDim2.fromOffset(x, y)
             tooltip.Visible = true
         end)
     end))
@@ -1249,7 +1260,18 @@ function Section:AddDropdown(options)
     end
 
     local function placePopup()
-        popup.Position = UDim2.fromOffset(field.AbsolutePosition.X, field.AbsolutePosition.Y + field.AbsoluteSize.Y + 6)
+        local camera = workspace.CurrentCamera
+        local viewport = camera and camera.ViewportSize or Vector2.new(1920, 1080)
+        local x = field.AbsolutePosition.X
+        local y = field.AbsolutePosition.Y + field.AbsoluteSize.Y + 6
+        local width = popup.AbsoluteSize.X > 0 and popup.AbsoluteSize.X or (options.Width or 154)
+        local height = popup.AbsoluteSize.Y > 0 and popup.AbsoluteSize.Y or popupHeight
+        if y + height > viewport.Y - 8 then
+            y = field.AbsolutePosition.Y - height - 6
+        end
+        x = math.clamp(x, 8, math.max(8, viewport.X - width - 8))
+        y = math.clamp(y, 8, math.max(8, viewport.Y - height - 8))
+        popup.Position = UDim2.fromOffset(x, y)
     end
 
     field.Activated:Connect(function()
@@ -1649,7 +1671,18 @@ function Section:AddColorPicker(options)
         end
         popup.Visible = not popup.Visible
         self.Window._openPopup = popup.Visible and popup or nil
-        popup.Position = UDim2.fromOffset(swatch.AbsolutePosition.X - 164, swatch.AbsolutePosition.Y + 28)
+        local camera = workspace.CurrentCamera
+        local viewport = camera and camera.ViewportSize or Vector2.new(1920, 1080)
+        local x = swatch.AbsolutePosition.X - 164
+        local y = swatch.AbsolutePosition.Y + 28
+        local width = popup.AbsoluteSize.X > 0 and popup.AbsoluteSize.X or 184
+        local height = popup.AbsoluteSize.Y > 0 and popup.AbsoluteSize.Y or 214
+        if y + height > viewport.Y - 8 then
+            y = swatch.AbsolutePosition.Y - height - 8
+        end
+        x = math.clamp(x, 8, math.max(8, viewport.X - width - 8))
+        y = math.clamp(y, 8, math.max(8, viewport.Y - height - 8))
+        popup.Position = UDim2.fromOffset(x, y)
     end)
 
     control:Set(control.Value, true)
@@ -1958,18 +1991,30 @@ function Tab:AddSection(options)
         Name = "Section",
         AutomaticSize = Enum.AutomaticSize.Y,
         Size = UDim2.new(1, 0, 0, 0),
-        Transparency = self.Window.Theme.SectionTransparency,
+        Transparency = options.Transparency ~= nil and options.Transparency or self.Window.Theme.SectionTransparency,
         Radius = self.Window.Theme.RadiusPanel,
         ClipsDescendants = true,
+        WashHeight = 18,
     })
-
-    local header = create("Frame", {
+    local flow = create("Frame", {
+        Name = "Flow",
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, options.Title and 38 or 10),
+        AutomaticSize = Enum.AutomaticSize.Y,
+        Size = UDim2.new(1, 0, 0, 0),
         Parent = root,
     })
+    list(flow, Enum.FillDirection.Vertical, 0)
 
-    if options.Title then
+    if options.Title and options.Title ~= "" then
+        local header = create("Frame", {
+            Name = "Header",
+            BackgroundColor3 = self.Window.Theme.Glass,
+            BackgroundTransparency = 0.18,
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, 0, 0, 36),
+            LayoutOrder = 1,
+            Parent = flow,
+        })
         create("TextLabel", {
             BackgroundTransparency = 1,
             Font = self.Window.Theme.FontMedium,
@@ -1978,21 +2023,31 @@ function Tab:AddSection(options)
             TextSize = 12,
             TextXAlignment = Enum.TextXAlignment.Left,
             TextTruncate = Enum.TextTruncate.AtEnd,
-            Position = UDim2.fromOffset(12, 0),
-            Size = UDim2.new(1, -24, 1, 0),
+            Position = UDim2.fromOffset(14, 0),
+            Size = UDim2.new(1, -28, 1, 0),
+            Parent = header,
+        })
+        create("Frame", {
+            BackgroundColor3 = self.Window.Theme.Divider,
+            BackgroundTransparency = 0.94,
+            BorderSizePixel = 0,
+            AnchorPoint = Vector2.new(0, 1),
+            Position = UDim2.new(0, 14, 1, 0),
+            Size = UDim2.new(1, -28, 0, 1),
             Parent = header,
         })
     end
 
     local body = create("Frame", {
+        Name = "Body",
         BackgroundTransparency = 1,
         AutomaticSize = Enum.AutomaticSize.Y,
-        Position = UDim2.fromOffset(0, options.Title and 38 or 4),
         Size = UDim2.new(1, 0, 0, 0),
-        Parent = root,
+        LayoutOrder = 2,
+        Parent = flow,
     })
     list(body, Enum.FillDirection.Vertical, 0)
-    padding(body, 4, 4, 0, 6)
+    padding(body, 6, 6, 5, 7)
 
     local section = setmetatable({
         Window = self.Window,
@@ -2009,7 +2064,10 @@ end
 function Tab:_refreshColumns()
     local left = self.LeftLayout.AbsoluteContentSize.Y
     local right = self.RightLayout.AbsoluteContentSize.Y
-    self.Columns.Size = UDim2.new(1, 0, 0, math.max(left, right))
+    local height = math.max(left, right)
+    self.Columns.Size = UDim2.new(1, 0, 0, height)
+    self.LeftColumn.Size = UDim2.new(0.5, -7, 0, left)
+    self.RightColumn.Size = UDim2.new(0.5, -7, 0, right)
 end
 
 function Window:_selectTab(tab, silent)
@@ -2064,43 +2122,48 @@ function Window:AddTab(options)
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
         ScrollBarThickness = 2,
         ScrollBarImageColor3 = self.Theme.TextMuted,
+        ScrollBarImageTransparency = 0.35,
         Visible = false,
         Parent = self.PageContainer,
     })
-    padding(page, 0, 10, 0, 12)
-    list(page, Enum.FillDirection.Vertical, 12)
+    padding(page, 2, 8, 2, 14)
+    list(page, Enum.FillDirection.Vertical, 14)
 
     local fullStack = create("Frame", {
         Name = "FullStack",
         BackgroundTransparency = 1,
         AutomaticSize = Enum.AutomaticSize.Y,
         Size = UDim2.new(1, 0, 0, 0),
+        LayoutOrder = 1,
         Parent = page,
     })
-    list(fullStack, Enum.FillDirection.Vertical, 12)
+    list(fullStack, Enum.FillDirection.Vertical, 14)
 
     local columns = create("Frame", {
         Name = "Columns",
         BackgroundTransparency = 1,
         Size = UDim2.new(1, 0, 0, 0),
+        LayoutOrder = 2,
         Parent = page,
     })
 
     local leftColumn = create("Frame", {
+        Name = "LeftColumn",
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(0.5, -6, 1, 0),
+        Size = UDim2.new(0.5, -7, 0, 0),
         Parent = columns,
     })
     local rightColumn = create("Frame", {
+        Name = "RightColumn",
         BackgroundTransparency = 1,
-        Position = UDim2.new(0.5, 6, 0, 0),
-        Size = UDim2.new(0.5, -6, 1, 0),
+        Position = UDim2.new(0.5, 7, 0, 0),
+        Size = UDim2.new(0.5, -7, 0, 0),
         Parent = columns,
     })
 
-    local leftLayout = list(leftColumn, Enum.FillDirection.Vertical, 12)
-    local rightLayout = list(rightColumn, Enum.FillDirection.Vertical, 12)
+    local leftLayout = list(leftColumn, Enum.FillDirection.Vertical, 14)
+    local rightLayout = list(rightColumn, Enum.FillDirection.Vertical, 14)
 
     tab.Page = page
     tab.FullStack = fullStack
@@ -2116,7 +2179,7 @@ function Window:AddTab(options)
         BorderSizePixel = 0,
         Text = "",
         AutoButtonColor = false,
-        Size = UDim2.new(1, 0, 0, 42),
+        Size = UDim2.new(1, 0, 0, 44),
         Selectable = true,
         Parent = self.NavList,
     })
@@ -2125,19 +2188,19 @@ function Window:AddTab(options)
         BackgroundColor3 = self.Theme.GlassHover,
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        Position = UDim2.fromOffset(6, 2),
-        Size = UDim2.new(1, -12, 1, -4),
+        Position = UDim2.fromOffset(7, 3),
+        Size = UDim2.new(1, -14, 1, -6),
         Parent = nav,
     })
-    corner(active, 6)
+    corner(active, 7)
 
     local mark = create("Frame", {
         BackgroundColor3 = self.Theme.Accent,
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         AnchorPoint = Vector2.new(0, 0.5),
-        Position = UDim2.new(0, 4, 0.5, 0),
-        Size = UDim2.fromOffset(2, 4),
+        Position = UDim2.new(0, 5, 0.5, 0),
+        Size = UDim2.fromOffset(2, 5),
         ZIndex = 4,
         Parent = nav,
     })
@@ -2146,7 +2209,7 @@ function Window:AddTab(options)
     local icon = self:_makeIcon(nav, tab.Icon, 18, "TextMuted", 4)
     if icon then
         icon.AnchorPoint = Vector2.new(0, 0.5)
-        icon.Position = UDim2.new(0, 18, 0.5, 0)
+        icon.Position = UDim2.new(0, 21, 0.5, 0)
     end
 
     local label = create("TextLabel", {
@@ -2157,8 +2220,8 @@ function Window:AddTab(options)
         TextSize = 13,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
-        Position = UDim2.fromOffset(icon and 48 or 18, 0),
-        Size = UDim2.new(1, -(icon and 58 or 28), 1, 0),
+        Position = UDim2.fromOffset(50, 0),
+        Size = UDim2.new(1, -64, 1, 0),
         ZIndex = 4,
         Parent = nav,
     })
@@ -2169,31 +2232,36 @@ function Window:AddTab(options)
         self:_selectTab(tab)
     end)
 
-    leftLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        tab:_refreshColumns()
-    end)
-    rightLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        tab:_refreshColumns()
-    end)
+    local function refresh()
+        task.defer(function()
+            if columns.Parent then
+                tab:_refreshColumns()
+            end
+        end)
+    end
+    leftLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(refresh)
+    rightLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(refresh)
 
     table.insert(self._tabs, tab)
     if not self._activeTab then
         self:_selectTab(tab, true)
     end
+    refresh()
     return tab
 end
 
 function Window:_buildSearch()
     local popup = self:_glass(self.Overlay, {
         Name = "SearchResults",
-        Size = UDim2.fromOffset(280, 246),
-        Transparency = 0.025,
+        Size = UDim2.fromOffset(300, 44),
+        Transparency = 0.015,
         Radius = self.Theme.RadiusPanel,
         ZIndex = 180,
         ClipsDescendants = true,
+        WashHeight = 18,
     })
     popup.Visible = false
-    self:_makeShadow(popup, 26, 0.62)
+    self:_makeShadow(popup, 24, 0.64)
     self.SearchPopup = popup
 
     local results = create("Frame", {
@@ -2202,8 +2270,20 @@ function Window:_buildSearch()
         Size = UDim2.new(1, -12, 1, -12),
         Parent = popup,
     })
-    list(results, Enum.FillDirection.Vertical, 2)
+    local resultsLayout = list(results, Enum.FillDirection.Vertical, 3)
     self.SearchResults = results
+
+    local function placePopup()
+        local camera = workspace.CurrentCamera
+        local viewport = camera and camera.ViewportSize or Vector2.new(1920, 1080)
+        local x = self.SearchField.AbsolutePosition.X
+        local y = self.SearchField.AbsolutePosition.Y + self.SearchField.AbsoluteSize.Y + 8
+        local width = 300
+        local height = popup.AbsoluteSize.Y > 0 and popup.AbsoluteSize.Y or 44
+        x = math.clamp(x, 8, math.max(8, viewport.X - width - 8))
+        y = math.clamp(y, 8, math.max(8, viewport.Y - height - 8))
+        popup.Position = UDim2.fromOffset(x, y)
+    end
 
     local function rebuild()
         for _, child in ipairs(results:GetChildren()) do
@@ -2216,12 +2296,6 @@ function Window:_buildSearch()
             popup.Visible = false
             return
         end
-
-        popup.Visible = true
-        popup.Position = UDim2.fromOffset(
-            self.SearchField.AbsolutePosition.X,
-            self.SearchField.AbsolutePosition.Y + self.SearchField.AbsoluteSize.Y + 7
-        )
 
         local count = 0
         for _, control in ipairs(self._controls) do
@@ -2241,13 +2315,13 @@ function Window:_buildSearch()
                     TextSize = 12,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     AutoButtonColor = false,
-                    Size = UDim2.new(1, 0, 0, 30),
+                    Size = UDim2.new(1, 0, 0, 32),
                     ZIndex = 184,
                     Parent = results,
                 })
-                corner(button, 5)
-                padding(button, 9, 9, 0, 0)
-                self:_hover(button, button, {NormalTransparency = 1, HoverTransparency = 0.58})
+                corner(button, 6)
+                padding(button, 10, 10, 0, 0)
+                self:_hover(button, button, {NormalTransparency = 1, HoverTransparency = 0.56})
                 button.Activated:Connect(function()
                     self:_selectTab(control.Section.Tab)
                     popup.Visible = false
@@ -2256,8 +2330,8 @@ function Window:_buildSearch()
                         if control.Root and control.Root.Parent then
                             local original = control.Hover.BackgroundTransparency
                             control.Hover.BackgroundColor3 = self.Theme.AccentSoft
-                            control.Hover.BackgroundTransparency = 0.45
-                            task.delay(0.35, function()
+                            control.Hover.BackgroundTransparency = 0.42
+                            task.delay(0.32, function()
                                 if control.Hover and control.Hover.Parent then
                                     self:_tween(control.Hover, 0.22, {
                                         BackgroundColor3 = self.Theme.GlassHover,
@@ -2270,6 +2344,15 @@ function Window:_buildSearch()
                 end)
             end
         end
+
+        if count == 0 then
+            popup.Visible = false
+            return
+        end
+
+        popup.Size = UDim2.fromOffset(300, 12 + count * 35)
+        popup.Visible = true
+        task.defer(placePopup)
     end
 
     self.SearchBox:GetPropertyChangedSignal("Text"):Connect(rebuild)
@@ -2411,10 +2494,16 @@ function Window:SetOpen(open)
         self.MainScale.Scale = 0.975
         self:_tween(self.MainGroup, 0.25, {GroupTransparency = 0}, Enum.EasingStyle.Quart)
         self:_tween(self.MainScale, 0.28, {Scale = 1}, Enum.EasingStyle.Quart)
+        if self.Blur then
+            self:_tween(self.Blur, 0.24, {Size = self.Options.BlurSize or 10}, Enum.EasingStyle.Quart)
+        end
         self:_playSound("Open")
     else
         self:_tween(self.MainGroup, 0.18, {GroupTransparency = 1}, Enum.EasingStyle.Quart)
         self:_tween(self.MainScale, 0.18, {Scale = 0.985}, Enum.EasingStyle.Quart)
+        if self.Blur then
+            self:_tween(self.Blur, 0.18, {Size = 0}, Enum.EasingStyle.Quart)
+        end
         self:_playSound("Close")
         task.delay(0.2, function()
             if not self.Open and self.Gui.Parent then
@@ -2433,6 +2522,10 @@ function Window:Destroy()
     for _, control in ipairs(self._controls) do
         disconnectAll(control._connections)
     end
+    if self.Blur then
+        self.Blur:Destroy()
+        self.Blur = nil
+    end
     if self.Gui then
         self.Gui:Destroy()
     end
@@ -2446,11 +2539,11 @@ function Window:_updateScale()
     local viewport = camera.ViewportSize
     local baseWidth = self.Theme.Width
     local baseHeight = self.Theme.Height
-    local availableWidth = math.max(320, viewport.X - 24)
-    local availableHeight = math.max(260, viewport.Y - 24)
+    local availableWidth = math.max(260, viewport.X - 24)
+    local availableHeight = math.max(220, viewport.Y - 24)
     local scale = math.min(1, availableWidth / baseWidth, availableHeight / baseHeight)
-    scale = math.max(0.58, scale)
     self.ResponsiveScale.Scale = scale
+    self._isCompact = viewport.X < 720
 end
 
 function LunkaraUI:CreateWindow(options)
@@ -2480,12 +2573,39 @@ function LunkaraUI:CreateWindow(options)
     local gui = create("ScreenGui", {
         Name = options.Name or "LunkaraUI",
         ResetOnSpawn = options.ResetOnSpawn == true,
-        IgnoreGuiInset = options.IgnoreGuiInset ~= false,
+        IgnoreGuiInset = true,
         ZIndexBehavior = Enum.ZIndexBehavior.Global,
         DisplayOrder = options.DisplayOrder or 40,
         Parent = resolveParent(options.Parent),
     })
     window.Gui = gui
+
+    -- Actual 3D background blur makes the glass readable. It never blurs GUI text.
+    if options.BackgroundBlur ~= false then
+        local blur = create("BlurEffect", {
+            Name = "LunkaraUI_BackdropBlur",
+            Size = 0,
+            Parent = Lighting,
+        })
+        window.Blur = blur
+        window:_tween(blur, 0.28, {Size = options.BlurSize or 10}, Enum.EasingStyle.Quart)
+    end
+
+    -- Preload custom icon assets so the navigation does not appear text-only while Roblox fetches them.
+    task.spawn(function()
+        local assets = {}
+        for _, value in pairs(window.Icons) do
+            local id = assetId(value)
+            if id ~= "" then
+                table.insert(assets, id)
+            end
+        end
+        if #assets > 0 then
+            pcall(function()
+                ContentProvider:PreloadAsync(assets)
+            end)
+        end
+    end)
 
     local overlay = create("Frame", {
         Name = "Overlay",
@@ -2496,13 +2616,12 @@ function LunkaraUI:CreateWindow(options)
     })
     window.Overlay = overlay
 
-    local mainGroup = create("CanvasGroup", {
-        Name = "WindowRoot",
+    local mainGroup = create("Frame", {
+        Name = "WindowAnchor",
         BackgroundTransparency = 1,
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = options.Position or UDim2.fromScale(0.5, 0.5),
         Size = UDim2.fromOffset(window.Theme.Width, window.Theme.Height),
-        GroupTransparency = 0,
         Parent = gui,
     })
     window.Root = mainGroup
@@ -2526,20 +2645,21 @@ function LunkaraUI:CreateWindow(options)
         Name = "Main",
         Size = UDim2.fromScale(1, 1),
         Transparency = window.Theme.WindowTransparency,
-        ColorKey = "Glass",
+        ColorKey = "Backdrop",
         Radius = window.Theme.RadiusWindow,
         ClipsDescendants = true,
         ZIndex = 2,
-        WashHeight = 42,
+        WashHeight = 56,
     })
     main.BackgroundColor3 = window.Theme.Backdrop
     window.Main = main
-    window:_makeShadow(main, 38, 0.45)
+    window:_makeShadow(main, 42, 0.5)
 
+    -- Sidebar
     local sidebar = create("Frame", {
         Name = "Sidebar",
         BackgroundColor3 = window.Theme.Sidebar,
-        BackgroundTransparency = 0.13,
+        BackgroundTransparency = 0.02,
         BorderSizePixel = 0,
         Size = UDim2.new(0, window.Theme.SidebarWidth, 1, 0),
         ZIndex = 4,
@@ -2547,45 +2667,44 @@ function LunkaraUI:CreateWindow(options)
     })
     window.Sidebar = sidebar
 
-    local sideWash = create("Frame", {
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BackgroundTransparency = 0.975,
-        BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 80),
-        ZIndex = 5,
+    local brand = create("Frame", {
+        Name = "Brand",
+        BackgroundTransparency = 1,
+        Position = UDim2.fromOffset(18, 14),
+        Size = UDim2.new(1, -36, 0, 34),
+        ZIndex = 6,
         Parent = sidebar,
     })
-
-    local brandL = create("TextLabel", {
+    local brandText = create("TextLabel", {
         BackgroundTransparency = 1,
         Font = window.Theme.FontBold,
         Text = options.Brand or "Lunkara",
         TextColor3 = window.Theme.Text,
-        TextSize = 17,
+        TextSize = 16,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Position = UDim2.fromOffset(18, 14),
-        Size = UDim2.fromOffset(110, 26),
+        Size = UDim2.fromOffset(76, 34),
+        AutomaticSize = Enum.AutomaticSize.X,
         ZIndex = 7,
-        Parent = sidebar,
+        Parent = brand,
     })
-    local brandUI = create("TextLabel", {
+    local suffix = create("TextLabel", {
         BackgroundTransparency = 1,
         Font = window.Theme.FontBold,
         Text = options.BrandSuffix or "UI",
         TextColor3 = window.Theme.Accent,
-        TextSize = 17,
+        TextSize = 16,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Position = UDim2.fromOffset(91, 14),
-        Size = UDim2.fromOffset(36, 26),
+        Position = UDim2.new(0, 82, 0, 0),
+        Size = UDim2.fromOffset(30, 34),
         ZIndex = 7,
-        Parent = sidebar,
+        Parent = brand,
     })
 
     local navList = create("Frame", {
         Name = "Navigation",
         BackgroundTransparency = 1,
-        Position = UDim2.fromOffset(6, 66),
-        Size = UDim2.new(1, -12, 1, -154),
+        Position = UDim2.fromOffset(8, 66),
+        Size = UDim2.new(1, -16, 1, -158),
         ZIndex = 5,
         Parent = sidebar,
     })
@@ -2594,18 +2713,22 @@ function LunkaraUI:CreateWindow(options)
 
     if options.ShowProfile ~= false and LocalPlayer then
         local profile = create("Frame", {
-            BackgroundTransparency = 1,
+            Name = "Profile",
+            BackgroundColor3 = window.Theme.Glass,
+            BackgroundTransparency = 0.48,
+            BorderSizePixel = 0,
             AnchorPoint = Vector2.new(0, 1),
             Position = UDim2.new(0, 10, 1, -10),
-            Size = UDim2.new(1, -20, 0, 62),
+            Size = UDim2.new(1, -20, 0, 58),
             ZIndex = 6,
             Parent = sidebar,
         })
+        corner(profile, 8)
         local avatar = create("ImageLabel", {
             BackgroundColor3 = window.Theme.Field,
-            BackgroundTransparency = 0.05,
+            BackgroundTransparency = 0.02,
             BorderSizePixel = 0,
-            Position = UDim2.fromOffset(4, 13),
+            Position = UDim2.fromOffset(8, 11),
             Size = UDim2.fromOffset(36, 36),
             ZIndex = 7,
             Parent = profile,
@@ -2626,8 +2749,8 @@ function LunkaraUI:CreateWindow(options)
             TextColor3 = window.Theme.Text,
             TextSize = 12,
             TextXAlignment = Enum.TextXAlignment.Left,
-            Position = UDim2.fromOffset(50, 12),
-            Size = UDim2.new(1, -54, 0, 20),
+            Position = UDim2.fromOffset(54, 10),
+            Size = UDim2.new(1, -62, 0, 19),
             ZIndex = 7,
             Parent = profile,
         })
@@ -2638,16 +2761,19 @@ function LunkaraUI:CreateWindow(options)
             TextColor3 = window.Theme.TextMuted,
             TextSize = 10,
             TextXAlignment = Enum.TextXAlignment.Left,
-            Position = UDim2.fromOffset(50, 31),
-            Size = UDim2.new(1, -54, 0, 18),
+            Position = UDim2.fromOffset(54, 29),
+            Size = UDim2.new(1, -62, 0, 16),
             ZIndex = 7,
             Parent = profile,
         })
     end
 
+    -- Main content frame
     local content = create("Frame", {
         Name = "Content",
-        BackgroundTransparency = 1,
+        BackgroundColor3 = window.Theme.Glass,
+        BackgroundTransparency = 0.76,
+        BorderSizePixel = 0,
         Position = UDim2.fromOffset(window.Theme.SidebarWidth, 0),
         Size = UDim2.new(1, -window.Theme.SidebarWidth, 1, 0),
         ZIndex = 4,
@@ -2664,18 +2790,28 @@ function LunkaraUI:CreateWindow(options)
     })
     window.Topbar = topbar
 
-    local searchField = create("Frame", {
-        Name = "SearchField",
-        BackgroundColor3 = window.Theme.Search,
-        BackgroundTransparency = 0.18,
-        BorderSizePixel = 0,
+    -- Right-aligned topbar controls live in a single measured host; no overlapping positions.
+    local topRight = create("Frame", {
+        Name = "TopRight",
+        BackgroundTransparency = 1,
         AnchorPoint = Vector2.new(1, 0.5),
-        Position = UDim2.new(1, -84, 0.5, 0),
-        Size = UDim2.fromOffset(235, 32),
+        Position = UDim2.new(1, -16, 0.5, 0),
+        Size = UDim2.fromOffset(322, 34),
         ZIndex = 7,
         Parent = topbar,
     })
-    corner(searchField, 6)
+
+    local searchField = create("Frame", {
+        Name = "SearchField",
+        BackgroundColor3 = window.Theme.Search,
+        BackgroundTransparency = 0.02,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(0, 1),
+        Size = UDim2.fromOffset(240, 32),
+        ZIndex = 7,
+        Parent = topRight,
+    })
+    corner(searchField, 7)
     window.SearchField = searchField
 
     local searchIcon = window:_makeIcon(searchField, "Search", 15, "TextMuted", 8)
@@ -2694,41 +2830,46 @@ function LunkaraUI:CreateWindow(options)
         TextColor3 = window.Theme.Text,
         TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Position = UDim2.fromOffset(searchIcon and 34 or 10, 0),
-        Size = UDim2.new(1, -(searchIcon and 44 or 20), 1, 0),
+        Position = UDim2.fromOffset(searchIcon and 34 or 11, 0),
+        Size = UDim2.new(1, -(searchIcon and 44 or 22), 1, 0),
         ZIndex = 8,
         Parent = searchField,
     })
     window.SearchBox = searchBox
 
     local minimize = create("TextButton", {
+        BackgroundColor3 = window.Theme.Field,
         BackgroundTransparency = 1,
         Text = "−",
         TextColor3 = window.Theme.TextSecondary,
         Font = window.Theme.FontMedium,
-        TextSize = 17,
+        TextSize = 16,
         AutoButtonColor = false,
-        AnchorPoint = Vector2.new(1, 0.5),
-        Position = UDim2.new(1, -44, 0.5, 0),
-        Size = UDim2.fromOffset(32, 32),
+        Position = UDim2.fromOffset(250, 1),
+        Size = UDim2.fromOffset(30, 32),
         Selectable = true,
         ZIndex = 8,
-        Parent = topbar,
+        Parent = topRight,
     })
+    corner(minimize, 6)
     local close = create("TextButton", {
+        BackgroundColor3 = window.Theme.Field,
         BackgroundTransparency = 1,
         Text = "×",
         TextColor3 = window.Theme.TextSecondary,
         Font = window.Theme.FontMedium,
-        TextSize = 18,
+        TextSize = 17,
         AutoButtonColor = false,
-        AnchorPoint = Vector2.new(1, 0.5),
-        Position = UDim2.new(1, -10, 0.5, 0),
-        Size = UDim2.fromOffset(32, 32),
+        Position = UDim2.fromOffset(286, 1),
+        Size = UDim2.fromOffset(30, 32),
         Selectable = true,
         ZIndex = 8,
-        Parent = topbar,
+        Parent = topRight,
     })
+    corner(close, 6)
+    window:_hover(minimize, minimize, {NormalTransparency = 1, HoverTransparency = 0.28})
+    window:_hover(close, close, {NormalTransparency = 1, HoverTransparency = 0.20, HoverColor = window.Theme.Danger})
+
     close.Activated:Connect(function()
         window:SetOpen(false)
     end)
@@ -2737,9 +2878,10 @@ function LunkaraUI:CreateWindow(options)
     end)
 
     local pageHeader = create("Frame", {
+        Name = "PageHeader",
         BackgroundTransparency = 1,
-        Position = UDim2.fromOffset(20, 60),
-        Size = UDim2.new(1, -40, 0, 62),
+        Position = UDim2.fromOffset(24, 62),
+        Size = UDim2.new(1, -48, 0, 52),
         ZIndex = 5,
         Parent = content,
     })
@@ -2748,9 +2890,10 @@ function LunkaraUI:CreateWindow(options)
         Font = window.Theme.FontBold,
         Text = "",
         TextColor3 = window.Theme.Text,
-        TextSize = 22,
+        TextSize = 21,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Size = UDim2.new(1, 0, 0, 30),
+        Position = UDim2.fromOffset(0, 0),
+        Size = UDim2.new(1, 0, 0, 28),
         ZIndex = 6,
         Parent = pageHeader,
     })
@@ -2761,8 +2904,8 @@ function LunkaraUI:CreateWindow(options)
         TextColor3 = window.Theme.TextSecondary,
         TextSize = 11,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Position = UDim2.fromOffset(0, 31),
-        Size = UDim2.new(1, 0, 0, 22),
+        Position = UDim2.fromOffset(0, 28),
+        Size = UDim2.new(1, 0, 0, 18),
         Visible = false,
         ZIndex = 6,
         Parent = pageHeader,
@@ -2773,8 +2916,8 @@ function LunkaraUI:CreateWindow(options)
     local pageContainer = create("Frame", {
         Name = "Pages",
         BackgroundTransparency = 1,
-        Position = UDim2.fromOffset(20, 122),
-        Size = UDim2.new(1, -40, 1, -140),
+        Position = UDim2.fromOffset(24, 116),
+        Size = UDim2.new(1, -48, 1, -136),
         ZIndex = 5,
         Parent = content,
     })
@@ -2783,8 +2926,8 @@ function LunkaraUI:CreateWindow(options)
     local toastHolder = create("Frame", {
         Name = "Notifications",
         BackgroundTransparency = 1,
-        Position = UDim2.fromOffset(20, 70),
-        Size = UDim2.fromOffset(300, 420),
+        Position = UDim2.fromOffset(18, 70),
+        Size = UDim2.fromOffset(310, 460),
         ZIndex = 185,
         Parent = overlay,
     })
@@ -2793,21 +2936,38 @@ function LunkaraUI:CreateWindow(options)
 
     window:_buildSearch()
 
-    -- Dragging is limited to the empty topbar region; controls remain clickable.
+    -- Drag with viewport clamp.
     local dragging = false
     local dragInput
     local dragStart
     local startPosition
 
+    local function clampWindowPosition(position)
+        local camera = workspace.CurrentCamera
+        if not camera then
+            return position
+        end
+        local viewport = camera.ViewportSize
+        local scale = window.ResponsiveScale.Scale
+        local halfW = (window.Theme.Width * scale) * 0.5
+        local halfH = (window.Theme.Height * scale) * 0.5
+        local centerX = viewport.X * position.X.Scale + position.X.Offset
+        local centerY = viewport.Y * position.Y.Scale + position.Y.Offset
+        centerX = math.clamp(centerX, halfW + 8, math.max(halfW + 8, viewport.X - halfW - 8))
+        centerY = math.clamp(centerY, halfH + 8, math.max(halfH + 8, viewport.Y - halfH - 8))
+        return UDim2.fromOffset(centerX, centerY)
+    end
+
     topbar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             local mouseX = input.Position.X
-            if mouseX >= searchField.AbsolutePosition.X - 8 then
+            if mouseX >= topRight.AbsolutePosition.X - 8 then
                 return
             end
             dragging = true
             dragStart = input.Position
-            startPosition = mainGroup.Position
+            local absolute = mainGroup.AbsolutePosition + (mainGroup.AbsoluteSize * 0.5)
+            startPosition = UDim2.fromOffset(absolute.X, absolute.Y)
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -2823,12 +2983,8 @@ function LunkaraUI:CreateWindow(options)
     table.insert(window._connections, UserInputService.InputChanged:Connect(function(input)
         if dragging and input == dragInput then
             local delta = input.Position - dragStart
-            mainGroup.Position = UDim2.new(
-                startPosition.X.Scale,
-                startPosition.X.Offset + delta.X,
-                startPosition.Y.Scale,
-                startPosition.Y.Offset + delta.Y
-            )
+            local nextPos = UDim2.fromOffset(startPosition.X.Offset + delta.X, startPosition.Y.Offset + delta.Y)
+            mainGroup.Position = clampWindowPosition(nextPos)
         end
     end))
 
@@ -2840,7 +2996,7 @@ function LunkaraUI:CreateWindow(options)
         end
         if input.KeyCode == toggleKey then
             window:Toggle()
-        elseif input.KeyCode == searchKey and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+        elseif input.KeyCode == searchKey and (UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.RightControl)) then
             window:OpenSearch()
         elseif input.KeyCode == Enum.KeyCode.Escape then
             window:CloseSearch()
