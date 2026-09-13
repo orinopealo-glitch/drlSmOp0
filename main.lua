@@ -4,7 +4,7 @@
     rebuilt around a modern theme/state/component architecture.
 
     Single-file ModuleScript / loadstring-compatible library.
-    Version: 1.1.0
+    Version: 2.0.0
 
     Recommended five custom icon slots (all optional):
       Home, Components, Palette, Search, Settings
@@ -18,59 +18,60 @@ local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
+local TextService = game:GetService("TextService")
 
 local LocalPlayer = Players.LocalPlayer
 
 local LunkaraUI = {
-    Version = "1.1.0",
+    Version = "2.0.0",
     Flags = {},
 }
 
 LunkaraUI.DefaultTheme = {
-    Name = "Carbon",
+    Name = "Night Amber",
 
-    -- Neutral foundation with a restrained warm accent.
-    Background = Color3.fromRGB(14, 14, 15),
-    Glass = Color3.fromRGB(18, 18, 19),
-    GlassTransparency = 0.035,
-    Sidebar = Color3.fromRGB(16, 16, 17),
-    Topbar = Color3.fromRGB(16, 16, 17),
-    Surface = Color3.fromRGB(24, 24, 25),
-    SurfaceAlt = Color3.fromRGB(21, 21, 22),
-    SurfaceHover = Color3.fromRGB(30, 30, 31),
-    SurfacePressed = Color3.fromRGB(35, 35, 36),
+    Background = Color3.fromRGB(11, 12, 14),
+    Glass = Color3.fromRGB(15, 16, 18),
+    GlassTransparency = 0,
+    Sidebar = Color3.fromRGB(12, 13, 15),
+    Topbar = Color3.fromRGB(14, 15, 17),
 
-    -- Accent is intentionally muted and warm. Users can override it per window/control.
-    Accent = Color3.fromRGB(205, 181, 129),
-    AccentSoft = Color3.fromRGB(72, 63, 45),
-    AccentText = Color3.fromRGB(22, 20, 16),
+    Panel = Color3.fromRGB(22, 23, 26),
+    Surface = Color3.fromRGB(22, 23, 26),
+    SurfaceAlt = Color3.fromRGB(28, 30, 34),
+    SurfaceHover = Color3.fromRGB(32, 34, 39),
+    SurfacePressed = Color3.fromRGB(39, 41, 47),
 
-    Text = Color3.fromRGB(238, 237, 233),
-    TextSecondary = Color3.fromRGB(185, 183, 177),
-    TextMuted = Color3.fromRGB(126, 124, 119),
+    Accent = Color3.fromRGB(232, 166, 79),
+    AccentSoft = Color3.fromRGB(103, 76, 42),
+    AccentText = Color3.fromRGB(18, 15, 10),
 
-    -- Kept as compatibility tokens. LunkaraUI does not create UIStroke by default.
+    Text = Color3.fromRGB(246, 245, 241),
+    TextSecondary = Color3.fromRGB(201, 200, 195),
+    TextMuted = Color3.fromRGB(126, 128, 134),
+
     Stroke = Color3.fromRGB(255, 255, 255),
     StrokeTransparency = 1,
-    Divider = Color3.fromRGB(63, 61, 57),
-    DividerTransparency = 0.54,
+    Divider = Color3.fromRGB(68, 70, 76),
+    DividerTransparency = 0.42,
 
-    Success = Color3.fromRGB(118, 166, 132),
-    Warning = Color3.fromRGB(198, 158, 92),
-    Danger = Color3.fromRGB(190, 104, 108),
-    Info = Color3.fromRGB(126, 151, 176),
+    Success = Color3.fromRGB(111, 174, 129),
+    Warning = Color3.fromRGB(222, 164, 76),
+    Danger = Color3.fromRGB(207, 91, 88),
+    Info = Color3.fromRGB(103, 156, 198),
 
-    RadiusWindow = 10,
-    RadiusPanel = 8,
-    RadiusControl = 4,
-    RadiusSmall = 4,
+    RadiusWindow = 4,
+    RadiusPanel = 3,
+    RadiusControl = 2,
+    RadiusSmall = 2,
 
-    ControlHeight = 44,
-    SectionGap = 18,
+    ControlHeight = 40,
+    SectionGap = 14,
     ControlGap = 0,
-    WindowWidth = 900,
-    WindowHeight = 560,
-    SidebarWidth = 184,
+    WindowWidth = 760,
+    WindowHeight = 480,
+    SidebarWidth = 58,
+    TopbarHeight = 44,
 
     Font = Enum.Font.Gotham,
     FontMedium = Enum.Font.GothamMedium,
@@ -79,12 +80,12 @@ LunkaraUI.DefaultTheme = {
 
 LunkaraUI.DefaultMotion = {
     Enabled = true,
-    Fast = 0.10,
-    Normal = 0.18,
-    Slow = 0.28,
+    Fast = 0.08,
+    Normal = 0.16,
+    Slow = 0.26,
     EasingStyle = Enum.EasingStyle.Quart,
     EasingDirection = Enum.EasingDirection.Out,
-    WindowOpenScale = 0.985,
+    WindowOpenScale = 0.975,
 }
 
 LunkaraUI.DefaultSounds = {
@@ -103,6 +104,11 @@ LunkaraUI.DefaultIcons = {
     Palette = 122671609869735,
     Search = 86567920400897,
     Settings = 86564139855583,
+}
+
+LunkaraUI.InternalAssets = {
+    Round2px = 5761488251,
+    Shadow2px = 5761498316,
 }
 
 local function cloneTable(source)
@@ -201,7 +207,7 @@ local function addCorner(parent, radius)
 end
 
 local function addStroke(_parent, _color, _transparency, _thickness)
-    -- LunkaraUI uses surface contrast and dividers instead of UIStroke.
+    -- LunkaraUI uses surface contrast instead of UIStroke borders.
     -- Existing internal calls remain safe so old component logic stays compatible.
     return nil
 end
@@ -585,7 +591,7 @@ function Window:_tooltip(target, text)
         AutomaticSize = Enum.AutomaticSize.XY,
         Font = self.Theme.Font,
         Text = tostring(text),
-        TextSize = 11,
+        TextSize = 12,
         TextWrapped = true,
         TextXAlignment = Enum.TextXAlignment.Left,
         Visible = false,
@@ -624,44 +630,33 @@ function Window:_updateResponsive()
 
     local camera = workspace.CurrentCamera
     local viewport = camera and camera.ViewportSize or Vector2.new(1280, 720)
-    local isMobileWidth = viewport.X < 720
+    local isMobileWidth = viewport.X < 640
     self._isCompact = isMobileWidth
 
-    local maxWidth = math.max(320, viewport.X - 24)
-    local maxHeight = math.max(360, viewport.Y - 24)
-    local width = math.min(self.Theme.WindowWidth or 900, maxWidth)
-    local height = math.min(self.Theme.WindowHeight or 560, maxHeight)
+    local maxWidth = math.max(300, viewport.X - 16)
+    local maxHeight = math.max(330, viewport.Y - 16)
+    local width = math.min(self.Theme.WindowWidth or 760, maxWidth)
+    local height = math.min(self.Theme.WindowHeight or 480, maxHeight)
+    local topbarHeight = self.Theme.TopbarHeight or 44
+    local sidebarWidth = isMobileWidth and 52 or (self.Theme.SidebarWidth or 58)
 
     self.Main.Size = UDim2.fromOffset(width, height)
 
-    if isMobileWidth then
-        self.Sidebar.Size = UDim2.new(0, math.min(250, width * 0.78), 1, -52)
-        self.Sidebar.Position = self._mobileSidebarOpen and UDim2.fromOffset(0, 52) or UDim2.fromOffset(-260, 52)
-        self.Sidebar.Visible = true
-        self.Content.Position = UDim2.fromOffset(0, 52)
-        self.Content.Size = UDim2.new(1, 0, 1, -52)
-        self.TopNav.Visible = false
-        self.MenuButton.Visible = true
-        self.BrandLabel.Position = UDim2.fromOffset(50, 0)
-    else
-        self._mobileSidebarOpen = false
-        self.Sidebar.Position = UDim2.fromOffset(0, 52)
-        self.Sidebar.Size = UDim2.new(0, self.Theme.SidebarWidth or 184, 1, -52)
-        self.Content.Position = UDim2.fromOffset(self.Theme.SidebarWidth or 184, 52)
-        self.Content.Size = UDim2.new(1, -(self.Theme.SidebarWidth or 184), 1, -52)
-        self.TopNav.Visible = (self._topTabCount or 0) > 0
-        self.MenuButton.Visible = false
-        self.BrandLabel.Position = UDim2.fromOffset(16, 0)
-    end
+    self._mobileSidebarOpen = false
+    self.Sidebar.Position = UDim2.fromOffset(0, topbarHeight)
+    self.Sidebar.Size = UDim2.new(0, sidebarWidth, 1, -topbarHeight)
+    self.Sidebar.Visible = true
+
+    self.Content.Position = UDim2.fromOffset(sidebarWidth, topbarHeight)
+    self.Content.Size = UDim2.new(1, -sidebarWidth, 1, -topbarHeight)
+
+    self.TopNav.Visible = (not isMobileWidth) and ((self._topTabCount or 0) > 0)
+    self.MenuButton.Visible = false
+    self.BrandLabel.Position = UDim2.fromOffset(26, 0)
 end
 
-function Window:_setMobileSidebar(open)
-    self._mobileSidebarOpen = open == true
-    if not self._isCompact then
-        return
-    end
-    local x = self._mobileSidebarOpen and 0 or -260
-    self:_tween(self.Sidebar, "Normal", {Position = UDim2.fromOffset(x, 52)})
+function Window:_setMobileSidebar(_open)
+    self._mobileSidebarOpen = false
 end
 
 function Window:_selectTab(tab)
@@ -692,35 +687,55 @@ function Window:_createTabButton(tab, parent, topMode)
         BorderSizePixel = 0,
         AutoButtonColor = false,
         Text = "",
-        Size = topMode and UDim2.fromOffset(110, 30) or UDim2.new(1, 0, 0, 38),
+        Size = topMode and UDim2.fromOffset(math.max(74, math.min(128, (#tab.Title * 7) + 24)), 30)
+            or UDim2.new(1, 0, 0, 46),
         Selectable = true,
         Parent = parent,
     })
 
-    if not topMode then
-        self:_theme(button, "BackgroundColor3", "Surface")
-        addCorner(button, self.Theme.RadiusControl)
+    self:_theme(button, "BackgroundColor3", topMode and "Topbar" or "Sidebar")
+
+    local icon
+    local label
+    if topMode then
+        label = create("TextLabel", {
+            BackgroundTransparency = 1,
+            Font = self.Theme.FontMedium,
+            Text = tab.Title,
+            TextSize = 13,
+            TextXAlignment = Enum.TextXAlignment.Center,
+            TextTruncate = Enum.TextTruncate.AtEnd,
+            Size = UDim2.fromScale(1, 1),
+            Parent = button,
+        })
+        self:_theme(label, "TextColor3", "TextSecondary")
+    else
+        icon = self:_makeIcon(button, tab.Icon, 19, "TextMuted")
+        icon.AnchorPoint = Vector2.new(0.5, 0.5)
+        icon.Position = UDim2.fromScale(0.5, 0.5)
+
+        label = create("TextLabel", {
+            BackgroundTransparency = 1,
+            Text = "",
+            TextTransparency = 1,
+            Size = UDim2.fromOffset(1, 1),
+            Parent = button,
+        })
+        self:_tooltip(button, tab.Title)
     end
 
-    local icon = self:_makeIcon(button, tab.Icon, topMode and 15 or 17, "TextMuted")
-    icon.AnchorPoint = Vector2.new(0, 0.5)
-    icon.Position = UDim2.new(0, topMode and 6 or 9, 0.5, 0)
-
-    local label = create("TextLabel", {
-        BackgroundTransparency = 1,
-        Font = self.Theme.FontMedium,
-        Text = tab.Title,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextTruncate = Enum.TextTruncate.AtEnd,
-        Position = UDim2.new(0, topMode and 28 or 35, 0, 0),
-        Size = UDim2.new(1, -(topMode and 32 or 41), 1, 0),
-        Parent = button,
-    })
-    self:_theme(label, "TextColor3", "TextSecondary")
-
     local indicator
-    if not topMode then
+    local underline
+    if topMode then
+        underline = create("Frame", {
+            BorderSizePixel = 0,
+            AnchorPoint = Vector2.new(0.5, 1),
+            Position = UDim2.new(0.5, 0, 1, 0),
+            Size = UDim2.fromOffset(0, 2),
+            Parent = button,
+        })
+        self:_theme(underline, "BackgroundColor3", "Accent")
+    else
         indicator = create("Frame", {
             BorderSizePixel = 0,
             AnchorPoint = Vector2.new(0, 0.5),
@@ -729,19 +744,6 @@ function Window:_createTabButton(tab, parent, topMode)
             Parent = button,
         })
         self:_theme(indicator, "BackgroundColor3", "Accent")
-        addCorner(indicator, 2)
-    end
-
-    local underline
-    if topMode then
-        underline = create("Frame", {
-            BorderSizePixel = 0,
-            AnchorPoint = Vector2.new(0.5, 1),
-            Position = UDim2.new(0.5, 0, 1, 0),
-            Size = UDim2.new(0, 0, 0, 1),
-            Parent = button,
-        })
-        self:_theme(underline, "BackgroundColor3", "Accent")
     end
 
     local record = {
@@ -761,18 +763,32 @@ function Window:_createTabButton(tab, parent, topMode)
     button.MouseEnter:Connect(function()
         playSound(self.Sounds, "Hover", self.Gui)
         if self._activeTab ~= tab then
-            self:_tween(label, "Fast", {TextColor3 = self.Theme.Text})
-            if not topMode then
-                self:_tween(button, "Fast", {BackgroundTransparency = 0.55})
+            if topMode then
+                self:_tween(label, "Fast", {TextColor3 = self.Theme.Text})
+            else
+                self:_tween(button, "Fast", {BackgroundColor3 = self.Theme.SurfaceAlt})
+                if icon then
+                    local image = icon:FindFirstChildWhichIsA("ImageLabel")
+                    if image then
+                        self:_tween(image, "Fast", {ImageColor3 = self.Theme.TextSecondary})
+                    end
+                end
             end
         end
     end)
 
     button.MouseLeave:Connect(function()
         if self._activeTab ~= tab then
-            self:_tween(label, "Fast", {TextColor3 = self.Theme.TextSecondary})
-            if not topMode then
-                self:_tween(button, "Fast", {BackgroundTransparency = 1})
+            if topMode then
+                self:_tween(label, "Fast", {TextColor3 = self.Theme.TextSecondary})
+            else
+                self:_tween(button, "Fast", {BackgroundColor3 = self.Theme.Sidebar})
+                if icon then
+                    local image = icon:FindFirstChildWhichIsA("ImageLabel")
+                    if image then
+                        self:_tween(image, "Fast", {ImageColor3 = self.Theme.TextMuted})
+                    end
+                end
             end
         end
     end)
@@ -784,22 +800,34 @@ function Tab:_setActive(active)
     self.Active = active
     for _, record in ipairs({self.SidebarButton, self.TopButton}) do
         if record then
-            local color = active and self.Window.Theme.Text or self.Window.Theme.TextSecondary
-            self.Window:_tween(record.Label, "Fast", {TextColor3 = color})
-            local iconImage = record.Icon:FindFirstChildWhichIsA("ImageLabel")
-            local iconFallback = record.Icon:FindFirstChildWhichIsA("TextLabel")
-            local iconColor = active and self.Window.Theme.Text or self.Window.Theme.TextMuted
-            if iconImage then
-                self.Window:_tween(iconImage, "Fast", {ImageColor3 = iconColor})
-            elseif iconFallback then
-                self.Window:_tween(iconFallback, "Fast", {TextColor3 = iconColor})
-            end
-            if record.Indicator then
-                self.Window:_tween(record.Indicator, "Fast", {Size = UDim2.fromOffset(2, active and 18 or 0)})
-                self.Window:_tween(record.Button, "Fast", {BackgroundTransparency = active and 0 or 1})
-            end
-            if record.Underline then
-                self.Window:_tween(record.Underline, "Fast", {Size = UDim2.new(0, active and 28 or 0, 0, 1)})
+            if record.TopMode then
+                self.Window:_tween(record.Label, "Fast", {
+                    TextColor3 = active and self.Window.Theme.Text or self.Window.Theme.TextSecondary,
+                })
+                if record.Underline then
+                    self.Window:_tween(record.Underline, "Fast", {
+                        Size = UDim2.fromOffset(active and 32 or 0, 2),
+                    })
+                end
+            else
+                self.Window:_tween(record.Button, "Fast", {
+                    BackgroundColor3 = active and self.Window.Theme.Surface or self.Window.Theme.Sidebar,
+                })
+                if record.Indicator then
+                    self.Window:_tween(record.Indicator, "Fast", {
+                        Size = UDim2.fromOffset(2, active and 20 or 0),
+                    })
+                end
+                if record.Icon then
+                    local iconImage = record.Icon:FindFirstChildWhichIsA("ImageLabel")
+                    local iconFallback = record.Icon:FindFirstChildWhichIsA("TextLabel")
+                    local iconColor = active and self.Window.Theme.Accent or self.Window.Theme.TextMuted
+                    if iconImage then
+                        self.Window:_tween(iconImage, "Fast", {ImageColor3 = iconColor})
+                    elseif iconFallback then
+                        self.Window:_tween(iconFallback, "Fast", {TextColor3 = iconColor})
+                    end
+                end
             end
         end
     end
@@ -830,7 +858,7 @@ function Window:AddTab(options)
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         ScrollBarThickness = 2,
-        ScrollBarImageTransparency = 0.55,
+        ScrollBarImageTransparency = 0.45,
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
         CanvasSize = UDim2.new(),
         Size = UDim2.fromScale(1, 1),
@@ -838,7 +866,7 @@ function Window:AddTab(options)
         Parent = self.PageContainer,
     })
     self:_theme(page, "ScrollBarImageColor3", "TextMuted")
-    addPadding(page, 16, 16, 8, 18)
+    addPadding(page, 18, 18, 8, 18)
 
     create("UIListLayout", {
         SortOrder = Enum.SortOrder.LayoutOrder,
@@ -891,14 +919,15 @@ function Tab:AddSection(options)
         Parent = self.Page,
     })
 
-    local layout = create("UIListLayout", {
+    create("UIListLayout", {
         SortOrder = Enum.SortOrder.LayoutOrder,
-        Padding = UDim.new(0, 7),
+        Padding = UDim.new(0, 6),
         Parent = root,
     })
 
     if section.Title ~= "" then
-        local headerHeight = section.Description and 38 or 28
+        local hasDescription = section.Description and section.Description ~= ""
+        local headerHeight = hasDescription and 42 or 28
         local header = create("TextButton", {
             Name = "Header",
             BackgroundTransparency = 1,
@@ -909,30 +938,39 @@ function Tab:AddSection(options)
             Parent = root,
         })
 
+        local mark = create("Frame", {
+            BorderSizePixel = 0,
+            Position = UDim2.fromOffset(0, 6),
+            Size = UDim2.fromOffset(2, 14),
+            Parent = header,
+        })
+        self.Window:_theme(mark, "BackgroundColor3", "Accent")
+
         local title = create("TextLabel", {
             BackgroundTransparency = 1,
             Font = self.Window.Theme.FontMedium,
             Text = section.Title,
-            TextSize = 13,
+            TextSize = 12,
             TextXAlignment = Enum.TextXAlignment.Left,
-            Size = UDim2.new(1, -30, 0, 20),
+            Position = UDim2.fromOffset(10, 0),
+            Size = UDim2.new(1, -38, 0, 26),
             Parent = header,
         })
-        self.Window:_theme(title, "TextColor3", "Text")
+        self.Window:_theme(title, "TextColor3", "TextSecondary")
 
-        if section.Description then
+        if hasDescription then
             local description = create("TextLabel", {
                 BackgroundTransparency = 1,
                 Font = self.Window.Theme.Font,
                 Text = section.Description,
-                TextSize = 11,
+                TextSize = 12,
                 TextXAlignment = Enum.TextXAlignment.Left,
-                TextWrapped = true,
-                Position = UDim2.fromOffset(0, 20),
-                Size = UDim2.new(1, -30, 0, 16),
+                TextTruncate = Enum.TextTruncate.AtEnd,
+                Position = UDim2.fromOffset(10, 23),
+                Size = UDim2.new(1, -38, 0, 17),
                 Parent = header,
             })
-            self.Window:_theme(description, "TextColor3", "TextSecondary")
+            self.Window:_theme(description, "TextColor3", "TextMuted")
         end
 
         if section.Collapsible then
@@ -948,7 +986,6 @@ function Tab:AddSection(options)
             })
             self.Window:_theme(chevron, "TextColor3", "TextMuted")
             section.Chevron = chevron
-
             header.Activated:Connect(function()
                 section:SetCollapsed(not section.Collapsed)
             end)
@@ -963,9 +1000,8 @@ function Tab:AddSection(options)
         ClipsDescendants = true,
         Parent = root,
     })
-    self.Window:_theme(body, "BackgroundColor3", "Surface")
+    self.Window:_theme(body, "BackgroundColor3", "Panel")
     addCorner(body, self.Window.Theme.RadiusPanel)
-    addPadding(body, 4, 4, 4, 4)
 
     create("UIListLayout", {
         SortOrder = Enum.SortOrder.LayoutOrder,
@@ -975,7 +1011,6 @@ function Tab:AddSection(options)
 
     section.Root = root
     section.Body = body
-    section.Layout = layout
 
     table.insert(self.Sections, section)
     return section
@@ -1029,31 +1064,13 @@ function Section:_baseControl(options, height)
         Parent = self.Body,
     })
     window:_theme(root, "BackgroundColor3", "Surface", options.BackgroundColor)
-    addCorner(root, options.Radius or window.Theme.RadiusControl)
-
-    local previous = self.Controls[#self.Controls]
-    if previous and previous.Divider then
-        previous.Divider.Visible = true
-    end
-
-    local divider = create("Frame", {
-        Name = "RowDivider",
-        AnchorPoint = Vector2.new(0, 1),
-        Position = UDim2.new(0, 12, 1, 0),
-        Size = UDim2.new(1, -24, 0, 1),
-        BorderSizePixel = 0,
-        Visible = false,
-        Parent = root,
-    })
-    window:_theme(divider, "BackgroundColor3", "Divider")
-    divider.BackgroundTransparency = window.Theme.DividerTransparency
 
     local control = setmetatable({
         Window = window,
         Section = self,
         Root = root,
         Stroke = nil,
-        Divider = divider,
+        Divider = nil,
         Flag = options.Flag,
         Disabled = options.Disabled == true,
         Visible = options.Visible ~= false,
@@ -1061,7 +1078,6 @@ function Section:_baseControl(options, height)
     }, Control)
 
     root.Visible = control.Visible
-
     if options.Tooltip then
         window:_tooltip(root, options.Tooltip)
     end
@@ -1101,11 +1117,11 @@ function Section:_titleBlock(control, options, rightPadding)
         BackgroundTransparency = 1,
         Font = window.Theme.FontMedium,
         Text = options.Title or options.Text or "Control",
-        TextSize = options.TitleSize or 13,
+        TextSize = options.TitleSize or 14,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
-        Position = UDim2.fromOffset(12, inlineDescription and 5 or 0),
-        Size = UDim2.new(1, -(rightPadding or 60) - 12, 0, inlineDescription and 19 or control.Root.Size.Y.Offset),
+        Position = UDim2.fromOffset(14, inlineDescription and 4 or 0),
+        Size = UDim2.new(1, -(rightPadding or 60) - 14, 0, inlineDescription and 20 or control.Root.Size.Y.Offset),
         Parent = control.Root,
     })
     window:_theme(title, "TextColor3", "Text", options.TextColor)
@@ -1117,11 +1133,11 @@ function Section:_titleBlock(control, options, rightPadding)
             BackgroundTransparency = 1,
             Font = window.Theme.Font,
             Text = options.Description,
-            TextSize = 11,
+            TextSize = 12,
             TextXAlignment = Enum.TextXAlignment.Left,
             TextTruncate = Enum.TextTruncate.AtEnd,
-            Position = UDim2.fromOffset(12, 24),
-            Size = UDim2.new(1, -(rightPadding or 60) - 12, 0, 16),
+            Position = UDim2.fromOffset(14, 23),
+            Size = UDim2.new(1, -(rightPadding or 60) - 14, 0, 16),
             Parent = control.Root,
         })
         window:_theme(description, "TextColor3", "TextSecondary")
@@ -1198,27 +1214,28 @@ end
 function Section:AddToggle(options)
     options = options or {}
     local control = self:_baseControl(options)
-    self:_titleBlock(control, options, 80)
+    self:_titleBlock(control, options, 58)
 
-    local track = create("Frame", {
+    local box = create("Frame", {
         AnchorPoint = Vector2.new(1, 0.5),
         Position = UDim2.new(1, -14, 0.5, 0),
-        Size = UDim2.fromOffset(36, 20),
+        Size = UDim2.fromOffset(20, 20),
         BorderSizePixel = 0,
         Parent = control.Root,
     })
-    self.Window:_theme(track, "BackgroundColor3", "SurfaceHover")
-    addCorner(track, 10)
+    self.Window:_theme(box, "BackgroundColor3", "SurfaceAlt")
+    addCorner(box, 3)
 
-    local knob = create("Frame", {
-        AnchorPoint = Vector2.new(0, 0.5),
-        Position = UDim2.new(0, 3, 0.5, 0),
-        Size = UDim2.fromOffset(14, 14),
-        BorderSizePixel = 0,
-        Parent = track,
+    local mark = create("TextLabel", {
+        BackgroundTransparency = 1,
+        Size = UDim2.fromScale(1, 1),
+        Font = self.Window.Theme.FontBold,
+        Text = "✓",
+        TextSize = 13,
+        TextTransparency = 1,
+        Parent = box,
     })
-    self.Window:_theme(knob, "BackgroundColor3", "TextSecondary")
-    addCorner(knob, 7)
+    self.Window:_theme(mark, "TextColor3", "AccentText")
 
     local hit = create("TextButton", {
         BackgroundTransparency = 1,
@@ -1234,13 +1251,11 @@ function Section:AddToggle(options)
 
     function control:Set(value, silent)
         self.Value = value == true
-        local position = self.Value and UDim2.new(1, -17, 0.5, 0) or UDim2.new(0, 3, 0.5, 0)
-        self.Window:_tween(knob, "Normal", {
-            Position = position,
-            BackgroundColor3 = self.Value and self.Window.Theme.Accent or self.Window.Theme.TextSecondary,
+        self.Window:_tween(box, "Fast", {
+            BackgroundColor3 = self.Value and self.Window.Theme.Accent or self.Window.Theme.SurfaceAlt,
         })
-        self.Window:_tween(track, "Normal", {
-            BackgroundColor3 = self.Value and self.Window.Theme.AccentSoft or self.Window.Theme.SurfaceHover,
+        self.Window:_tween(mark, "Fast", {
+            TextTransparency = self.Value and 0 or 1,
         })
         if self.Flag then
             self.Window:_setFlag(self.Flag, self.Value, silent)
@@ -1256,8 +1271,8 @@ function Section:AddToggle(options)
     end
 
     function control:RefreshTheme()
-        knob.BackgroundColor3 = self.Value and self.Window.Theme.Accent or self.Window.Theme.TextSecondary
-        track.BackgroundColor3 = self.Value and self.Window.Theme.AccentSoft or self.Window.Theme.SurfaceHover
+        box.BackgroundColor3 = self.Value and self.Window.Theme.Accent or self.Window.Theme.SurfaceAlt
+        mark.TextColor3 = self.Window.Theme.AccentText
     end
 
     hit.Activated:Connect(function()
@@ -1353,31 +1368,33 @@ function Section:AddSlider(options)
     local step = tonumber(options.Step or options.Increment) or 1
     local default = clamp(tonumber(options.Default) or minimum, minimum, maximum)
 
-    local control = self:_baseControl(options, usesInlineDescription(self.Window, options) and 68 or 58)
-    self:_titleBlock(control, options, 72)
+    local inlineDescription = usesInlineDescription(self.Window, options)
+    local control = self:_baseControl(options, inlineDescription and 66 or 54)
+    self:_titleBlock(control, options, 74)
 
     local valueLabel = create("TextLabel", {
-        BackgroundTransparency = 1,
+        BackgroundTransparency = 0,
         AnchorPoint = Vector2.new(1, 0),
-        Position = UDim2.new(1, -14, 0, 9),
-        Size = UDim2.fromOffset(58, 20),
+        Position = UDim2.new(1, -12, 0, 8),
+        Size = UDim2.fromOffset(48, 22),
         Font = self.Window.Theme.FontMedium,
         Text = "",
         TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Right,
+        TextXAlignment = Enum.TextXAlignment.Center,
         Parent = control.Root,
     })
+    self.Window:_theme(valueLabel, "BackgroundColor3", "SurfaceAlt")
     self.Window:_theme(valueLabel, "TextColor3", "TextSecondary")
+    addCorner(valueLabel, 2)
 
     local bar = create("Frame", {
         AnchorPoint = Vector2.new(0.5, 1),
-        Position = UDim2.new(0.5, 0, 1, -12),
-        Size = UDim2.new(1, -28, 0, 5),
+        Position = UDim2.new(0.5, 0, 1, -10),
+        Size = UDim2.new(1, -28, 0, 2),
         BorderSizePixel = 0,
         Parent = control.Root,
     })
-    self.Window:_theme(bar, "BackgroundColor3", "SurfaceHover")
-    addCorner(bar, 3)
+    self.Window:_theme(bar, "BackgroundColor3", "SurfaceAlt")
 
     local fill = create("Frame", {
         Size = UDim2.new(0, 0, 1, 0),
@@ -1385,17 +1402,16 @@ function Section:AddSlider(options)
         Parent = bar,
     })
     self.Window:_theme(fill, "BackgroundColor3", "Accent", options.AccentColor)
-    addCorner(fill, 3)
 
     local knob = create("Frame", {
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0, 0, 0.5, 0),
-        Size = UDim2.fromOffset(15, 15),
+        Size = UDim2.fromOffset(10, 10),
         BorderSizePixel = 0,
         Parent = bar,
     })
-    self.Window:_theme(knob, "BackgroundColor3", "Accent", options.AccentColor)
-    addCorner(knob, 8)
+    self.Window:_theme(knob, "BackgroundColor3", "Text")
+    addCorner(knob, 5)
 
     local hit = create("TextButton", {
         BackgroundTransparency = 1,
@@ -1403,7 +1419,7 @@ function Section:AddSlider(options)
         AutoButtonColor = false,
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.fromScale(0.5, 0.5),
-        Size = UDim2.new(1, 10, 0, 26),
+        Size = UDim2.new(1, 12, 0, 24),
         Selectable = true,
         Parent = bar,
     })
@@ -1442,9 +1458,10 @@ function Section:AddSlider(options)
     function control:RefreshTheme()
         if options.AccentColor == nil then
             fill.BackgroundColor3 = self.Window.Theme.Accent
-            knob.BackgroundColor3 = self.Window.Theme.Accent
         end
-        bar.BackgroundColor3 = self.Window.Theme.SurfaceHover
+        knob.BackgroundColor3 = self.Window.Theme.Text
+        bar.BackgroundColor3 = self.Window.Theme.SurfaceAlt
+        valueLabel.BackgroundColor3 = self.Window.Theme.SurfaceAlt
         valueLabel.TextColor3 = self.Window.Theme.TextSecondary
     end
 
@@ -1465,10 +1482,7 @@ function Section:AddSlider(options)
     end)
 
     table.insert(control._connections, UserInputService.InputChanged:Connect(function(input)
-        if not dragging then
-            return
-        end
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             setFromX(input.Position.X)
         end
     end))
@@ -1480,24 +1494,94 @@ end
 function Section:AddInput(options)
     options = options or {}
     local multiline = options.Multiline == true
-    local height = multiline and 108 or (usesInlineDescription(self.Window, options) and 78 or 68)
-    local control = self:_baseControl(options, height)
 
     if not multiline then
-        self:_titleBlock(control, options, 14)
-    else
-        local title = create("TextLabel", {
-            BackgroundTransparency = 1,
-            Font = self.Window.Theme.FontMedium,
-            Text = options.Title or "Input",
+        local control = self:_baseControl(options, 40)
+        self:_titleBlock(control, options, 224)
+
+        local box = create("TextBox", {
+            Name = "TextBox",
+            BackgroundTransparency = 0,
+            BorderSizePixel = 0,
+            ClearTextOnFocus = options.ClearOnFocus == true,
+            Font = self.Window.Theme.Font,
+            PlaceholderText = options.Placeholder or "Enter text...",
+            Text = tostring(options.Default or ""),
             TextSize = 13,
             TextXAlignment = Enum.TextXAlignment.Left,
-            Position = UDim2.fromOffset(14, 8),
-            Size = UDim2.new(1, -28, 0, 18),
+            TextYAlignment = Enum.TextYAlignment.Center,
+            TextWrapped = false,
+            MultiLine = false,
+            AnchorPoint = Vector2.new(1, 0.5),
+            Position = UDim2.new(1, -12, 0.5, 0),
+            Size = UDim2.fromOffset(190, 28),
             Parent = control.Root,
         })
-        self.Window:_theme(title, "TextColor3", "Text")
+        self.Window:_theme(box, "BackgroundColor3", "SurfaceAlt")
+        self.Window:_theme(box, "TextColor3", "Text")
+        self.Window:_theme(box, "PlaceholderColor3", "TextMuted")
+        addCorner(box, 2)
+        addPadding(box, 9, 9, 0, 0)
+
+        control.Value = box.Text
+
+        function control:Set(value, silent)
+            value = tostring(value or "")
+            if options.MaxLength and #value > options.MaxLength then
+                value = string.sub(value, 1, options.MaxLength)
+            end
+            if options.Numeric and value ~= "" and not tonumber(value) then
+                return self
+            end
+            self.Value = value
+            box.Text = value
+            if self.Flag then
+                self.Window:_setFlag(self.Flag, value, silent)
+            end
+            if not silent then
+                safeCallback(options.Callback, value)
+            end
+            return self
+        end
+
+        function control:Get()
+            return self.Value
+        end
+
+        box.Focused:Connect(function()
+            self.Window:_tween(box, "Fast", {BackgroundColor3 = self.Window.Theme.SurfaceHover})
+        end)
+
+        box.FocusLost:Connect(function(enterPressed)
+            self.Window:_tween(box, "Fast", {BackgroundColor3 = self.Window.Theme.SurfaceAlt})
+            control:Set(box.Text)
+            safeCallback(options.FocusLost, box.Text, enterPressed)
+        end)
+
+        box:GetPropertyChangedSignal("Text"):Connect(function()
+            if options.Live then
+                control:Set(box.Text)
+            elseif options.MaxLength and #box.Text > options.MaxLength then
+                box.Text = string.sub(box.Text, 1, options.MaxLength)
+            end
+        end)
+
+        control:Set(control.Value, true)
+        return control
     end
+
+    local control = self:_baseControl(options, 104)
+    local title = create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = self.Window.Theme.FontMedium,
+        Text = options.Title or "Input",
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Position = UDim2.fromOffset(14, 7),
+        Size = UDim2.new(1, -28, 0, 20),
+        Parent = control.Root,
+    })
+    self.Window:_theme(title, "TextColor3", "Text")
 
     local box = create("TextBox", {
         Name = "TextBox",
@@ -1507,23 +1591,20 @@ function Section:AddInput(options)
         Font = self.Window.Theme.Font,
         PlaceholderText = options.Placeholder or "Enter text...",
         Text = tostring(options.Default or ""),
-        TextSize = 12,
+        TextSize = 13,
         TextXAlignment = Enum.TextXAlignment.Left,
-        TextYAlignment = multiline and Enum.TextYAlignment.Top or Enum.TextYAlignment.Center,
-        TextWrapped = multiline,
-        MultiLine = multiline,
-        Size = multiline and UDim2.new(1, -28, 0, 64) or UDim2.new(1, -28, 0, 30),
-        Position = multiline and UDim2.fromOffset(14, 34) or UDim2.new(0, 14, 1, -38),
+        TextYAlignment = Enum.TextYAlignment.Top,
+        TextWrapped = true,
+        MultiLine = true,
+        Position = UDim2.fromOffset(14, 34),
+        Size = UDim2.new(1, -28, 0, 58),
         Parent = control.Root,
     })
     self.Window:_theme(box, "BackgroundColor3", "SurfaceAlt")
     self.Window:_theme(box, "TextColor3", "Text")
     self.Window:_theme(box, "PlaceholderColor3", "TextMuted")
-    addCorner(box, self.Window.Theme.RadiusSmall)
-    addPadding(box, 10, 10, multiline and 8 or 0, multiline and 8 or 0)
-
-    local stroke = addStroke(box, self.Window.Theme.Stroke, self.Window.Theme.StrokeTransparency, 1)
-    self.Window:_themeStroke(stroke, "Stroke", "StrokeTransparency")
+    addCorner(box, 2)
+    addPadding(box, 9, 9, 7, 7)
 
     control.Value = box.Text
 
@@ -1531,9 +1612,6 @@ function Section:AddInput(options)
         value = tostring(value or "")
         if options.MaxLength and #value > options.MaxLength then
             value = string.sub(value, 1, options.MaxLength)
-        end
-        if options.Numeric and value ~= "" and not tonumber(value) then
-            return self
         end
         self.Value = value
         box.Text = value
@@ -1553,19 +1631,10 @@ function Section:AddInput(options)
     box.Focused:Connect(function()
         self.Window:_tween(box, "Fast", {BackgroundColor3 = self.Window.Theme.SurfaceHover})
     end)
-
     box.FocusLost:Connect(function(enterPressed)
         self.Window:_tween(box, "Fast", {BackgroundColor3 = self.Window.Theme.SurfaceAlt})
         control:Set(box.Text)
         safeCallback(options.FocusLost, box.Text, enterPressed)
-    end)
-
-    box:GetPropertyChangedSignal("Text"):Connect(function()
-        if options.Live then
-            control:Set(box.Text)
-        elseif options.MaxLength and #box.Text > options.MaxLength then
-            box.Text = string.sub(box.Text, 1, options.MaxLength)
-        end
     end)
 
     control:Set(control.Value, true)
@@ -1613,7 +1682,7 @@ function Section:AddDropdown(options)
         BackgroundTransparency = 1,
         Font = self.Window.Theme.Font,
         Text = "",
-        TextSize = 11,
+        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
         Position = UDim2.fromOffset(9, 0),
@@ -1646,7 +1715,7 @@ function Section:AddDropdown(options)
             Font = self.Window.Theme.Font,
             PlaceholderText = "Search...",
             Text = "",
-            TextSize = 11,
+            TextSize = 12,
             TextXAlignment = Enum.TextXAlignment.Left,
             Position = UDim2.fromOffset(8, 8),
             Size = UDim2.new(1, -16, 0, 30),
@@ -1771,7 +1840,7 @@ function Section:AddDropdown(options)
                 BackgroundTransparency = 1,
                 Font = self.Window.Theme.Font,
                 Text = tostring(value),
-                TextSize = 11,
+                TextSize = 12,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 Position = UDim2.fromOffset(10, 0),
                 Size = UDim2.new(1, -38, 1, 0),
@@ -1934,7 +2003,7 @@ function Section:AddKeybind(options)
         AutoButtonColor = false,
         Font = self.Window.Theme.FontMedium,
         Text = "",
-        TextSize = 11,
+        TextSize = 12,
         Selectable = true,
         Parent = control.Root,
     })
@@ -2149,7 +2218,7 @@ function Section:AddColorPicker(options)
         Font = self.Window.Theme.FontMedium,
         PlaceholderText = "#FFFFFF",
         Text = "",
-        TextSize = 11,
+        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left,
         Position = UDim2.fromOffset(12, 197),
         Size = UDim2.new(1, -24, 0, 29),
@@ -2356,7 +2425,7 @@ function Section:AddParagraph(options)
         BackgroundTransparency = 1,
         Font = self.Window.Theme.Font,
         Text = options.Text or options.Description or "",
-        TextSize = 11,
+        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextYAlignment = Enum.TextYAlignment.Top,
         TextWrapped = true,
@@ -2402,7 +2471,7 @@ function Section:AddDivider(options)
             AutomaticSize = Enum.AutomaticSize.X,
             Font = self.Window.Theme.FontMedium,
             Text = "  " .. options.Text .. "  ",
-            TextSize = 10,
+            TextSize = 12,
             Position = UDim2.fromOffset(12, 0),
             Size = UDim2.new(0, 0, 1, 0),
             Parent = control.Root,
@@ -2426,7 +2495,7 @@ function Section:AddProgress(options)
         Size = UDim2.fromOffset(52, 18),
         Font = self.Window.Theme.FontMedium,
         Text = "0%",
-        TextSize = 11,
+        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Right,
         Parent = control.Root,
     })
@@ -2523,7 +2592,7 @@ function Section:AddSegmented(options)
             AutoButtonColor = false,
             Font = self.Window.Theme.FontMedium,
             Text = tostring(value),
-            TextSize = 11,
+            TextSize = 12,
             TextColor3 = self.Window.Theme.TextSecondary,
             Size = UDim2.new(1 / math.max(1, #values), 0, 1, 0),
             Selectable = true,
@@ -2598,7 +2667,7 @@ function Section:AddStepper(options)
         BackgroundTransparency = 1,
         Font = self.Window.Theme.FontMedium,
         Text = "0",
-        TextSize = 11,
+        TextSize = 12,
         Position = UDim2.fromOffset(36, 0),
         Size = UDim2.fromOffset(60, 30),
         Parent = holder,
@@ -2680,7 +2749,7 @@ function Section:AddBadge(options)
         Size = UDim2.new(0, 0, 0, 22),
         Font = self.Window.Theme.FontMedium,
         Text = "  " .. tostring(options.Text or options.Value or "Ready") .. "  ",
-        TextSize = 10,
+        TextSize = 12,
         Parent = control.Root,
     })
     local colorKey = options.Kind == "Success" and "Success" or options.Kind == "Warning" and "Warning" or options.Kind == "Danger" and "Danger" or options.Kind == "Info" and "Info" or "Accent"
@@ -2730,7 +2799,7 @@ function Section:AddImage(options)
             BackgroundTransparency = 1,
             Font = self.Window.Theme.FontMedium,
             Text = options.Caption,
-            TextSize = 11,
+            TextSize = 12,
             TextXAlignment = Enum.TextXAlignment.Left,
             Position = UDim2.fromOffset(12, 0),
             Size = UDim2.new(1, -24, 1, 0),
@@ -2798,7 +2867,7 @@ function Section:AddSubTabs(options)
             AutoButtonColor = false,
             Font = self.Window.Theme.FontMedium,
             Text = tostring(name),
-            TextSize = 11,
+            TextSize = 12,
             TextColor3 = self.Window.Theme.TextSecondary,
             AutomaticSize = Enum.AutomaticSize.X,
             Size = UDim2.new(0, 0, 1, 0),
@@ -2900,7 +2969,7 @@ function Window:_createSearch()
                             AutoButtonColor = false,
                             Font = self.Theme.FontMedium,
                             Text = "  " .. tab.Title .. "  /  " .. label,
-                            TextSize = 11,
+                            TextSize = 12,
                             TextXAlignment = Enum.TextXAlignment.Left,
                             Size = UDim2.new(1, 0, 0, 34),
                             ZIndex = 123,
@@ -2955,25 +3024,75 @@ function Window:Notify(options)
     end
     options = options or {}
 
-    local hasDescription = options.Description and options.Description ~= ""
-    local toast = create("CanvasGroup", {
-        BackgroundTransparency = 0.01,
-        GroupTransparency = 1,
-        BorderSizePixel = 0,
-        Size = UDim2.fromOffset(282, hasDescription and 58 or 44),
+    local titleText = tostring(options.Title or "Notification")
+    local descriptionText = options.Description and tostring(options.Description) or nil
+    local width = 300
+    local innerWidth = width - 24
+
+    local descriptionHeight = 0
+    if descriptionText and descriptionText ~= "" then
+        local bounds = TextService:GetTextSize(
+            descriptionText,
+            13,
+            self.Theme.Font,
+            Vector2.new(innerWidth, 1000)
+        )
+        descriptionHeight = math.max(18, bounds.Y)
+    end
+
+    local height = descriptionHeight > 0 and (39 + descriptionHeight) or 38
+
+    local slot = create("Frame", {
+        BackgroundTransparency = 1,
+        Size = UDim2.fromOffset(width, height),
         ZIndex = 150,
         Parent = self.ToastHolder,
     })
-    self:_theme(toast, "BackgroundColor3", "Surface")
-    addCorner(toast, 7)
 
-    local kindKey = options.Kind == "Success" and "Success" or options.Kind == "Warning" and "Warning" or options.Kind == "Danger" and "Danger" or options.Kind == "Info" and "Info" or "Accent"
+    local toast = create("CanvasGroup", {
+        BackgroundTransparency = 1,
+        GroupTransparency = 0,
+        Position = UDim2.fromOffset(-width - 30, 0),
+        Size = UDim2.fromScale(1, 1),
+        ZIndex = 151,
+        Parent = slot,
+    })
+
+    create("ImageLabel", {
+        BackgroundTransparency = 1,
+        Image = assetId(LunkaraUI.InternalAssets.Shadow2px),
+        ImageColor3 = Color3.fromRGB(0, 0, 0),
+        ImageTransparency = 0.42,
+        ScaleType = Enum.ScaleType.Slice,
+        SliceCenter = Rect.new(17, 17, 283, 283),
+        Position = UDim2.fromOffset(-15, -15),
+        Size = UDim2.new(1, 30, 1, 30),
+        ZIndex = 150,
+        Parent = toast,
+    })
+
+    create("ImageLabel", {
+        BackgroundTransparency = 1,
+        Image = assetId(LunkaraUI.InternalAssets.Round2px),
+        ImageColor3 = self.Theme.Surface,
+        ScaleType = Enum.ScaleType.Slice,
+        SliceCenter = Rect.new(2, 2, 298, 298),
+        Size = UDim2.fromScale(1, 1),
+        ZIndex = 151,
+        Parent = toast,
+    })
+
+    local kindKey = options.Kind == "Success" and "Success"
+        or options.Kind == "Warning" and "Warning"
+        or options.Kind == "Danger" and "Danger"
+        or options.Kind == "Info" and "Info"
+        or "Accent"
+
     local dot = create("Frame", {
         BorderSizePixel = 0,
-        AnchorPoint = Vector2.new(0, 0.5),
-        Position = UDim2.new(0, 13, 0, hasDescription and 18 or 22),
-        Size = UDim2.fromOffset(6, 6),
-        ZIndex = 151,
+        Position = UDim2.fromOffset(10, 12),
+        Size = UDim2.fromOffset(5, 5),
+        ZIndex = 153,
         Parent = toast,
     })
     self:_theme(dot, "BackgroundColor3", kindKey)
@@ -2982,51 +3101,57 @@ function Window:Notify(options)
     local title = create("TextLabel", {
         BackgroundTransparency = 1,
         Font = self.Theme.FontMedium,
-        Text = options.Title or "Notification",
-        TextSize = 12,
+        Text = titleText,
+        TextSize = 14,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Position = UDim2.fromOffset(27, hasDescription and 8 or 0),
-        Size = UDim2.new(1, -40, 0, hasDescription and 20 or 44),
-        ZIndex = 151,
+        Position = UDim2.fromOffset(23, 5),
+        Size = UDim2.new(1, -34, 0, 26),
+        ZIndex = 153,
         Parent = toast,
     })
     self:_theme(title, "TextColor3", "Text")
 
-    if hasDescription then
+    if descriptionHeight > 0 then
         local desc = create("TextLabel", {
             BackgroundTransparency = 1,
             Font = self.Theme.Font,
-            Text = options.Description,
-            TextSize = 11,
-            TextTruncate = Enum.TextTruncate.AtEnd,
+            Text = descriptionText,
+            TextSize = 13,
+            TextWrapped = true,
             TextXAlignment = Enum.TextXAlignment.Left,
-            Position = UDim2.fromOffset(27, 29),
-            Size = UDim2.new(1, -40, 0, 17),
-            ZIndex = 151,
+            TextYAlignment = Enum.TextYAlignment.Top,
+            Position = UDim2.fromOffset(12, 31),
+            Size = UDim2.new(1, -24, 0, descriptionHeight),
+            ZIndex = 153,
             Parent = toast,
         })
         self:_theme(desc, "TextColor3", "TextSecondary")
     end
 
-    local offset = create("UIScale", {
-        Scale = 0.992,
-        Parent = toast,
-    })
-
+    local closed = false
     local function close()
-        self:_tween(offset, "Fast", {Scale = 0.992})
-        self:_tween(toast, "Fast", {GroupTransparency = 1})
-        task.delay(self:_duration("Fast") + 0.03, function()
-            if toast.Parent then
-                toast:Destroy()
+        if closed then
+            return
+        end
+        closed = true
+        self:_tween(toast, "Fast", {
+            Position = UDim2.fromOffset(-width - 30, 0),
+            GroupTransparency = 1,
+        }, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
+        task.delay(self:_duration("Fast") + 0.04, function()
+            if slot.Parent then
+                slot:Destroy()
             end
         end)
     end
 
-    self:_tween(offset, "Normal", {Scale = 1})
-    self:_tween(toast, "Normal", {GroupTransparency = 0})
+    self:_tween(toast, "Normal", {
+        Position = UDim2.fromOffset(0, 0),
+        GroupTransparency = 0,
+    }, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+
     playSound(self.Sounds, "Open", self.Gui)
-    task.delay(options.Duration or 3.4, close)
+    task.delay(options.Duration or 4.5, close)
 
     return {Close = close, Instance = toast}
 end
@@ -3093,7 +3218,7 @@ function Window:Modal(options)
         AutoButtonColor = false,
         Font = self.Theme.FontMedium,
         Text = options.CancelText or "Cancel",
-        TextSize = 11,
+        TextSize = 12,
         Position = UDim2.new(0, 18, 1, -48),
         Size = UDim2.new(0.5, -23, 0, 34),
         ZIndex = 172,
@@ -3110,7 +3235,7 @@ function Window:Modal(options)
         AutoButtonColor = false,
         Font = self.Theme.FontMedium,
         Text = options.ConfirmText or "Confirm",
-        TextSize = 11,
+        TextSize = 12,
         Position = UDim2.new(0.5, 5, 1, -48),
         Size = UDim2.new(0.5, -23, 0, 34),
         ZIndex = 172,
@@ -3188,7 +3313,7 @@ function Window:ContextMenu(items, position)
             AutoButtonColor = false,
             Font = self.Theme.FontMedium,
             Text = "  " .. tostring(item.Title or item.Text or "Item"),
-            TextSize = 11,
+            TextSize = 12,
             TextXAlignment = Enum.TextXAlignment.Left,
             Size = UDim2.new(1, 0, 0, 31),
             ZIndex = 123,
@@ -3329,42 +3454,35 @@ function LunkaraUI:CreateWindow(options)
     })
     window.MainScale = mainScale
 
+    local topbarHeight = window.Theme.TopbarHeight or 44
     local topbar = create("Frame", {
         Name = "Topbar",
         BackgroundTransparency = 0,
         BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 52),
+        Size = UDim2.new(1, 0, 0, topbarHeight),
         Parent = main,
     })
     window:_theme(topbar, "BackgroundColor3", "Topbar")
     window.Topbar = topbar
 
-    local topDivider = create("Frame", {
-        AnchorPoint = Vector2.new(0, 1),
-        Position = UDim2.fromScale(0, 1),
-        Size = UDim2.new(1, 0, 0, 1),
+    local brandMark = create("Frame", {
         BorderSizePixel = 0,
+        AnchorPoint = Vector2.new(0, 0.5),
+        Position = UDim2.new(0, 12, 0.5, 0),
+        Size = UDim2.fromOffset(3, 15),
         Parent = topbar,
     })
-    window:_theme(topDivider, "BackgroundColor3", "Divider")
-    topDivider.BackgroundTransparency = window.Theme.DividerTransparency
+    window:_theme(brandMark, "BackgroundColor3", "Accent")
 
     local menuButton = create("TextButton", {
         BackgroundTransparency = 1,
-        Text = "≡",
-        Font = window.Theme.FontBold,
-        TextSize = 20,
-        Position = UDim2.fromOffset(8, 8),
-        Size = UDim2.fromOffset(38, 38),
+        Text = "",
+        Position = UDim2.fromOffset(0, 0),
+        Size = UDim2.fromOffset(1, 1),
         Visible = false,
-        Selectable = true,
         Parent = topbar,
     })
-    window:_theme(menuButton, "TextColor3", "TextSecondary")
     window.MenuButton = menuButton
-    menuButton.Activated:Connect(function()
-        window:_setMobileSidebar(not window._mobileSidebarOpen)
-    end)
 
     local brand = create("TextLabel", {
         BackgroundTransparency = 1,
@@ -3372,8 +3490,8 @@ function LunkaraUI:CreateWindow(options)
         Text = options.Title or "LunkaraUI",
         TextSize = 14,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Position = UDim2.fromOffset(16, 0),
-        Size = UDim2.fromOffset(168, 52),
+        Position = UDim2.fromOffset(26, 0),
+        Size = UDim2.fromOffset(145, topbarHeight),
         Parent = topbar,
     })
     window:_theme(brand, "TextColor3", "Text")
@@ -3382,29 +3500,31 @@ function LunkaraUI:CreateWindow(options)
     local topNav = create("Frame", {
         Name = "TopNavigation",
         BackgroundTransparency = 1,
-        Position = UDim2.fromOffset(184, 11),
-        Size = UDim2.new(1, -340, 0, 30),
+        Position = UDim2.fromOffset(168, 7),
+        Size = UDim2.new(1, -282, 0, 30),
         ClipsDescendants = true,
+        Visible = false,
         Parent = topbar,
     })
     create("UIListLayout", {
         FillDirection = Enum.FillDirection.Horizontal,
         SortOrder = Enum.SortOrder.LayoutOrder,
-        Padding = UDim.new(0, 4),
+        Padding = UDim.new(0, 2),
         Parent = topNav,
     })
     window.TopNav = topNav
 
     local searchButton = create("TextButton", {
         AnchorPoint = Vector2.new(1, 0.5),
-        Position = UDim2.new(1, -52, 0.5, 0),
-        Size = UDim2.fromOffset(36, 36),
+        Position = UDim2.new(1, -43, 0.5, 0),
+        Size = UDim2.fromOffset(34, 34),
         BackgroundTransparency = 1,
         Text = "",
+        AutoButtonColor = false,
         Selectable = true,
         Parent = topbar,
     })
-    local searchIcon = window:_makeIcon(searchButton, "Search", 18, "TextSecondary")
+    local searchIcon = window:_makeIcon(searchButton, "Search", 17, "TextSecondary")
     searchIcon.AnchorPoint = Vector2.new(0.5, 0.5)
     searchIcon.Position = UDim2.fromScale(0.5, 0.5)
     searchButton.Activated:Connect(function()
@@ -3413,16 +3533,27 @@ function LunkaraUI:CreateWindow(options)
     end)
     searchButton.MouseEnter:Connect(function()
         playSound(window.Sounds, "Hover", window.Gui)
+        local image = searchIcon:FindFirstChildWhichIsA("ImageLabel")
+        if image then
+            window:_tween(image, "Fast", {ImageColor3 = window.Theme.Text})
+        end
+    end)
+    searchButton.MouseLeave:Connect(function()
+        local image = searchIcon:FindFirstChildWhichIsA("ImageLabel")
+        if image then
+            window:_tween(image, "Fast", {ImageColor3 = window.Theme.TextSecondary})
+        end
     end)
 
     local closeButton = create("TextButton", {
         AnchorPoint = Vector2.new(1, 0.5),
-        Position = UDim2.new(1, -10, 0.5, 0),
-        Size = UDim2.fromOffset(32, 32),
+        Position = UDim2.new(1, -8, 0.5, 0),
+        Size = UDim2.fromOffset(30, 30),
         BackgroundTransparency = 1,
         Text = "×",
         Font = window.Theme.FontMedium,
         TextSize = 18,
+        AutoButtonColor = false,
         Selectable = true,
         Parent = topbar,
     })
@@ -3433,14 +3564,18 @@ function LunkaraUI:CreateWindow(options)
     end)
     closeButton.MouseEnter:Connect(function()
         playSound(window.Sounds, "Hover", window.Gui)
+        window:_tween(closeButton, "Fast", {TextColor3 = window.Theme.Text})
+    end)
+    closeButton.MouseLeave:Connect(function()
+        window:_tween(closeButton, "Fast", {TextColor3 = window.Theme.TextSecondary})
     end)
 
     local sidebar = create("Frame", {
         Name = "Sidebar",
         BackgroundTransparency = 0,
         BorderSizePixel = 0,
-        Position = UDim2.fromOffset(0, 52),
-        Size = UDim2.new(0, window.Theme.SidebarWidth, 1, -52),
+        Position = UDim2.fromOffset(0, topbarHeight),
+        Size = UDim2.new(0, window.Theme.SidebarWidth, 1, -topbarHeight),
         ZIndex = 4,
         Parent = main,
     })
@@ -3451,34 +3586,35 @@ function LunkaraUI:CreateWindow(options)
         Name = "SidebarList",
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        Position = UDim2.fromOffset(10, 12),
-        Size = UDim2.new(1, -20, 1, -24),
+        Position = UDim2.fromOffset(0, 7),
+        Size = UDim2.new(1, 0, 1, -14),
         CanvasSize = UDim2.new(),
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
         ScrollBarThickness = 0,
         Parent = sidebar,
     })
-    addPadding(sidebarList, 0, 0, 0, 8)
     create("UIListLayout", {
         SortOrder = Enum.SortOrder.LayoutOrder,
-        Padding = UDim.new(0, 6),
+        Padding = UDim.new(0, 2),
         Parent = sidebarList,
     })
     window.SidebarList = sidebarList
 
     local content = create("Frame", {
         Name = "Content",
-        BackgroundTransparency = 1,
-        Position = UDim2.fromOffset(window.Theme.SidebarWidth, 52),
-        Size = UDim2.new(1, -window.Theme.SidebarWidth, 1, -52),
+        BackgroundTransparency = 0,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(window.Theme.SidebarWidth, topbarHeight),
+        Size = UDim2.new(1, -window.Theme.SidebarWidth, 1, -topbarHeight),
         Parent = main,
     })
+    window:_theme(content, "BackgroundColor3", "Background")
     window.Content = content
 
     local pageHeader = create("Frame", {
         BackgroundTransparency = 1,
-        Position = UDim2.fromOffset(16, 11),
-        Size = UDim2.new(1, -32, 0, 40),
+        Position = UDim2.fromOffset(18, 8),
+        Size = UDim2.new(1, -36, 0, 44),
         Parent = content,
     })
 
@@ -3486,9 +3622,9 @@ function LunkaraUI:CreateWindow(options)
         BackgroundTransparency = 1,
         Font = window.Theme.FontBold,
         Text = "",
-        TextSize = 16,
+        TextSize = 17,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Size = UDim2.new(1, 0, 0, 21),
+        Size = UDim2.new(1, 0, 0, 23),
         Parent = pageHeader,
     })
     window:_theme(pageTitle, "TextColor3", "Text")
@@ -3498,10 +3634,10 @@ function LunkaraUI:CreateWindow(options)
         BackgroundTransparency = 1,
         Font = window.Theme.Font,
         Text = "",
-        TextSize = 11,
+        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Position = UDim2.fromOffset(0, 22),
-        Size = UDim2.new(1, 0, 0, 16),
+        Position = UDim2.fromOffset(0, 23),
+        Size = UDim2.new(1, 0, 0, 18),
         Parent = pageHeader,
     })
     window:_theme(pageSubtitle, "TextColor3", "TextMuted")
@@ -3518,24 +3654,23 @@ function LunkaraUI:CreateWindow(options)
 
     local toastHolder = create("Frame", {
         BackgroundTransparency = 1,
-        AnchorPoint = Vector2.new(1, 1),
-        Position = UDim2.new(1, -12, 1, -12),
-        Size = UDim2.fromOffset(292, 360),
+        AnchorPoint = Vector2.new(0, 0.5),
+        Position = UDim2.new(0, 20, 0.5, -10),
+        Size = UDim2.fromOffset(300, 400),
         ZIndex = 145,
         Parent = overlay,
     })
     create("UIListLayout", {
-        VerticalAlignment = Enum.VerticalAlignment.Bottom,
-        HorizontalAlignment = Enum.HorizontalAlignment.Right,
+        VerticalAlignment = Enum.VerticalAlignment.Center,
+        HorizontalAlignment = Enum.HorizontalAlignment.Left,
         SortOrder = Enum.SortOrder.LayoutOrder,
-        Padding = UDim.new(0, 6),
+        Padding = UDim.new(0, 10),
         Parent = toastHolder,
     })
     window.ToastHolder = toastHolder
 
     window:_createSearch()
 
-    -- Dragging: topbar only on pointer devices.
     local dragging = false
     local dragStart
     local startPosition
@@ -3543,8 +3678,7 @@ function LunkaraUI:CreateWindow(options)
 
     topbar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            local target = UserInputService:GetFocusedTextBox()
-            if target then
+            if UserInputService:GetFocusedTextBox() then
                 return
             end
             dragging = true
@@ -3577,7 +3711,6 @@ function LunkaraUI:CreateWindow(options)
         end
     end))
 
-    -- Keyboard / controller shortcuts.
     local toggleKey = options.ToggleKey or Enum.KeyCode.RightControl
     local searchKey = options.SearchKey or Enum.KeyCode.K
 
@@ -3621,7 +3754,7 @@ function LunkaraUI:CreateWindow(options)
         window.Open = false
         gui.Enabled = false
     else
-        mainScale.Scale = window.Motion.WindowOpenScale or 0.965
+        mainScale.Scale = window.Motion.WindowOpenScale or 0.975
         main.BackgroundTransparency = 1
         task.defer(function()
             if main.Parent then
@@ -3635,55 +3768,66 @@ function LunkaraUI:CreateWindow(options)
 end
 
 LunkaraUI.Themes = {
+    NightAmber = cloneTable(LunkaraUI.DefaultTheme),
     Carbon = cloneTable(LunkaraUI.DefaultTheme),
     Obsidian = cloneTable(LunkaraUI.DefaultTheme),
+
     Graphite = mergeTable(LunkaraUI.DefaultTheme, {
         Name = "Graphite",
-        Glass = Color3.fromRGB(21, 21, 22),
-        Sidebar = Color3.fromRGB(18, 18, 19),
-        Topbar = Color3.fromRGB(18, 18, 19),
-        Surface = Color3.fromRGB(28, 28, 29),
-        SurfaceAlt = Color3.fromRGB(24, 24, 25),
-        SurfaceHover = Color3.fromRGB(34, 34, 35),
-        SurfacePressed = Color3.fromRGB(39, 39, 40),
-        Accent = Color3.fromRGB(166, 175, 184),
-        AccentSoft = Color3.fromRGB(57, 61, 65),
+        Glass = Color3.fromRGB(18, 19, 21),
+        Background = Color3.fromRGB(14, 15, 17),
+        Panel = Color3.fromRGB(25, 26, 29),
+        Surface = Color3.fromRGB(25, 26, 29),
+        SurfaceAlt = Color3.fromRGB(32, 34, 38),
+        Accent = Color3.fromRGB(216, 172, 104),
+        AccentSoft = Color3.fromRGB(91, 72, 45),
     }),
+
+    Steel = mergeTable(LunkaraUI.DefaultTheme, {
+        Name = "Steel",
+        Glass = Color3.fromRGB(15, 17, 19),
+        Background = Color3.fromRGB(12, 14, 16),
+        Sidebar = Color3.fromRGB(11, 13, 15),
+        Topbar = Color3.fromRGB(13, 15, 17),
+        Panel = Color3.fromRGB(22, 25, 28),
+        Surface = Color3.fromRGB(22, 25, 28),
+        SurfaceAlt = Color3.fromRGB(29, 33, 37),
+        Accent = Color3.fromRGB(119, 168, 181),
+        AccentSoft = Color3.fromRGB(51, 78, 85),
+    }),
+
+    Crimson = mergeTable(LunkaraUI.DefaultTheme, {
+        Name = "Crimson",
+        Accent = Color3.fromRGB(205, 91, 78),
+        AccentSoft = Color3.fromRGB(94, 43, 38),
+    }),
+
     Slate = mergeTable(LunkaraUI.DefaultTheme, {
         Name = "Slate",
-        Glass = Color3.fromRGB(20, 21, 22),
-        Sidebar = Color3.fromRGB(18, 19, 20),
-        Topbar = Color3.fromRGB(18, 19, 20),
-        Surface = Color3.fromRGB(27, 28, 29),
-        SurfaceAlt = Color3.fromRGB(23, 24, 25),
-        SurfaceHover = Color3.fromRGB(33, 34, 35),
-        SurfacePressed = Color3.fromRGB(38, 39, 40),
-        Accent = Color3.fromRGB(154, 170, 164),
-        AccentSoft = Color3.fromRGB(49, 59, 55),
+        Accent = Color3.fromRGB(119, 168, 181),
+        AccentSoft = Color3.fromRGB(51, 78, 85),
     }),
+
     Pearl = mergeTable(LunkaraUI.DefaultTheme, {
         Name = "Pearl",
-        Background = Color3.fromRGB(226, 224, 218),
-        Glass = Color3.fromRGB(239, 237, 231),
-        GlassTransparency = 0.015,
-        Sidebar = Color3.fromRGB(232, 230, 224),
-        Topbar = Color3.fromRGB(235, 233, 227),
-        Surface = Color3.fromRGB(222, 220, 214),
-        SurfaceAlt = Color3.fromRGB(229, 227, 221),
-        SurfaceHover = Color3.fromRGB(214, 211, 204),
-        SurfacePressed = Color3.fromRGB(205, 202, 194),
-        Accent = Color3.fromRGB(111, 96, 67),
-        AccentSoft = Color3.fromRGB(194, 183, 157),
-        AccentText = Color3.fromRGB(248, 246, 240),
-        Text = Color3.fromRGB(34, 33, 30),
-        TextSecondary = Color3.fromRGB(82, 79, 73),
-        TextMuted = Color3.fromRGB(122, 118, 109),
-        Divider = Color3.fromRGB(132, 127, 117),
-        DividerTransparency = 0.62,
+        Background = Color3.fromRGB(229, 228, 224),
+        Glass = Color3.fromRGB(239, 238, 234),
+        Sidebar = Color3.fromRGB(222, 221, 216),
+        Topbar = Color3.fromRGB(233, 232, 228),
+        Panel = Color3.fromRGB(217, 216, 211),
+        Surface = Color3.fromRGB(217, 216, 211),
+        SurfaceAlt = Color3.fromRGB(206, 205, 199),
+        SurfaceHover = Color3.fromRGB(198, 197, 191),
+        SurfacePressed = Color3.fromRGB(188, 187, 181),
+        Text = Color3.fromRGB(28, 29, 31),
+        TextSecondary = Color3.fromRGB(68, 69, 72),
+        TextMuted = Color3.fromRGB(112, 113, 117),
+        AccentText = Color3.fromRGB(20, 17, 12),
     }),
 }
 
 --[[
+    QUICK START--[[
     QUICK START
 
     local Lunkara = loadstring(game:HttpGet("YOUR_RAW_GITHUB_URL"))()
@@ -3780,7 +3924,7 @@ LunkaraUI.Themes = {
 
     General:AddColorPicker({
         Title = "Accent override",
-        Default = Color3.fromRGB(111, 125, 244),
+        Default = Color3.fromRGB(232, 166, 79),
         Flag = "AccentColor",
     })
 
